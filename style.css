@@ -1,0 +1,101 @@
+/* --- Global Styles --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f7f6; /* Light grey background */
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- Header --- */
+header {
+    background-color: #004a99; /* A professional blue */
+    color: #ffffff;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.2rem;
+}
+
+/* --- Main Content --- */
+main {
+    flex: 1; /* Makes the main content grow to fill available space */
+    max-width: 960px;
+    width: 90%;
+    margin: 2rem auto; /* Centers the content */
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+section {
+    margin-bottom: 2rem;
+}
+
+h2 {
+    color: #004a99;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+h3 {
+    color: #333;
+    margin-top: 1.5rem;
+}
+
+/* --- File List Styling --- */
+.file-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.file-list li {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.file-list li a {
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #0056b3; /* Darker blue for links */
+    font-weight: 600;
+    /* Use a monospace font for filenames */
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.1rem;
+}
+
+.file-list li:hover {
+    background-color: #e9ecef; /* Light hover effect */
+}
+
+.file-list li a:hover {
+    color: #003d80;
+}
+
+/* --- Footer --- */
+footer {
+    background-color: #333333;
+    color: #cccccc;
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+footer p {
+    margin: 0;
+}
