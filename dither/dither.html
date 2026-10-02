@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Binary Dither Tool</title>
+  <!-- -----------------------------------------------------------------------------
+    Style Section
+  ------------------------------------------------------------------------------ -->
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1115;
+      --panel: rgba(25, 28, 34, 0.92);
+      --panel-solid: #191c22;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --line: #303640;
+      --accent: #7c9cff;
+      --accent-hover: #98afff;
+      --soft: #252d49;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+    }
+
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f5f6f8;
+      --panel: rgba(255, 255, 255, 0.9);
+      --panel-solid: #ffffff;
+      --text: #15171a;
+      --muted: #6b7280;
+      --line: #dfe3e8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --soft: #eef2ff;
+      --shadow: 0 18px 45px rgba(24, 32, 48, 0.09);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34rem), var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input, select { font: inherit; }
+    button { border: 0; }
+    .app-shell { width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 28px; }
+    .hero { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 28px; }
+    .eyebrow { margin: 0 0 8px; color: var(--accent); font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(2rem, 5vw, 4rem); letter-spacing: -.055em; line-height: .98; }
+    .intro { max-width: 780px; margin: 16px 0 0; color: var(--muted); font-size: 1.05rem; line-height: 1.6; }
+    .icon-button { width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; background: var(--panel); color: var(--text); cursor: pointer; }
+    .workspace { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 20px; align-items: stretch; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); backdrop-filter: blur(16px); }
+    .controls { padding: 20px; }
+    .drop-zone { display: grid; place-items: center; min-height: 150px; padding: 20px; border: 1.5px dashed var(--line); border-radius: 16px; background: color-mix(in srgb, var(--panel-solid) 74%, transparent); cursor: pointer; text-align: center; transition: .2s ease; }
+    .drop-zone:hover, .drop-zone.is-dragging { border-color: var(--accent); background: var(--soft); transform: translateY(-1px); }
+    .drop-zone input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .drop-zone span:last-child { margin-top: 4px; color: var(--muted); font-size: .85rem; }
+    .upload-icon { display: grid; place-items: center; width: 36px; height: 36px; margin-bottom: 9px; border-radius: 10px; background: var(--soft); color: var(--accent); font-size: 1.35rem; }
+    .control-section { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .control-section h2 { margin: 0 0 15px; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
+    .select-control, .label-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .select-control label, .label-row label, .dimension-grid label { font-size: .9rem; font-weight: 700; }
+    select, .number-input, .dimension-grid input { min-height: 34px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-solid); color: var(--text); }
+    select { width: 165px; }
+    .number-input { width: 78px; color: var(--accent); font-size: .85rem; font-weight: 800; text-align: right; }
+    select:focus, input:focus { border-color: var(--accent); outline: 2px solid color-mix(in srgb, var(--accent) 22%, transparent); outline-offset: 1px; }
+    .control-group { margin-top: 17px; }
+    .control-group.compact { margin-top: 14px; }
+    .label-row output { color: var(--accent); font-size: .85rem; font-weight: 800; }
+    input[type="range"] { width: 100%; margin: 10px 0 0; accent-color: var(--accent); }
+    .dimension-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 17px; }
+    .dimension-grid label { display: grid; gap: 6px; }
+    .dimension-grid input { width: 100%; }
+    .check-control { display: flex; align-items: center; gap: 9px; margin-top: 14px; color: var(--muted); font-size: .82rem; cursor: pointer; }
+    .check-control input { accent-color: var(--accent); }
+    button.primary { min-height: 44px; padding: 10px 14px; border-radius: 12px; background: var(--accent); color: white; cursor: pointer; font-weight: 750; transition: .18s ease; }
+    button.primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+    button:disabled { cursor: not-allowed; opacity: .42; }
+    .full-width { width: 100%; margin-top: 22px; }
+    .preview-panel { min-height: 720px; overflow: hidden; }
+    .preview-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 68px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .preview-toolbar strong { display: block; }
+    .preview-toolbar div span { display: block; margin-top: 3px; color: var(--muted); font-size: .78rem; }
+    .view-switch { display: inline-flex; margin: 0; padding: 3px; border: 1px solid var(--line); border-radius: 11px; background: var(--bg); }
+    .view-switch label { cursor: pointer; }
+    .view-switch input { position: absolute; opacity: 0; pointer-events: none; }
+    .view-switch span { display: block; padding: 7px 10px; border-radius: 8px; color: var(--muted); font-size: .78rem; font-weight: 700; transition: .18s ease; }
+    .view-switch input:checked + span { background: var(--panel-solid); color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,.09); }
+    .view-switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .canvas-stage { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; min-height: 650px; padding: 24px; overflow: auto; background-image: linear-gradient(45deg, color-mix(in srgb, var(--line) 28%, transparent) 25%, transparent 25%), linear-gradient(-45deg, color-mix(in srgb, var(--line) 28%, transparent) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, color-mix(in srgb, var(--line) 28%, transparent) 75%), linear-gradient(-45deg, transparent 75%, color-mix(in srgb, var(--line) 28%, transparent) 75%); background-position: 0 0, 0 8px, 8px -8px, -8px 0; background-size: 16px 16px; }
+    canvas[hidden] { display: none !important; }
+    canvas { display: block; max-width: 100%; max-height: 590px; width: auto; height: auto; background: white; border-radius: 4px; box-shadow: 0 12px 32px rgba(0,0,0,.18); image-rendering: pixelated; image-rendering: crisp-edges; }
+    .empty-state { color: var(--muted); text-align: center; }
+    .empty-state span { display: block; color: var(--accent); font-size: 4.5rem; line-height: 1; }
+    .empty-state p { margin: 12px 0 0; }
+    .canvas-stage.is-side-by-side.side-horizontal { flex-direction: row; flex-wrap: nowrap; }
+    .canvas-stage.is-side-by-side.side-horizontal canvas { max-width: calc(50% - 9px); }
+    .canvas-stage.is-side-by-side.side-vertical { flex-direction: column; flex-wrap: nowrap; }
+    .canvas-stage.is-side-by-side.side-vertical canvas { max-width: 100%; max-height: 285px; }
+    footer { padding-top: 20px; color: var(--muted); font-size: .78rem; text-align: center; }
+    
+    @media (max-width: 850px) { 
+      .app-shell { width: min(100% - 20px, 680px); padding-top: 28px; } 
+      .workspace { grid-template-columns: 1fr; } 
+      .preview-panel { min-height: 420px; } 
+      .canvas-stage { min-height: 350px; } }
+    
+    @media (max-width: 480px) { 
+      .hero { align-items: center; } 
+      .intro { font-size: .95rem; } 
+      .preview-toolbar { align-items: flex-start; flex-direction: column; } 
+      .view-switch { width: 100%; } 
+      .view-switch label { flex: 1; text-align: center; } 
+      .canvas-stage.is-side-by-side canvas { max-width: 100%; } }
+
+  </style>
+
+</head>
+<body>
+
+  <!-- -----------------------------------------------------------------------------
+    HTML Section
+  ------------------------------------------------------------------------------ -->
+
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Image Tool</p>
+        <h1>Binary Dithering</h1>
+        <p class="intro">Turn an image into black-and-white pixels using dithering, error diffusion, or a combination of both.</p>
+      </div>
+      <button id="themeButton" class="icon-button" type="button" aria-label="Toggle colour theme" title="Toggle colour theme">◐</button>
+    </header>
+
+    <section class="workspace" aria-label="Binary dither generator">
+      <aside class="panel controls">
+        <label class="drop-zone" id="dropZone" for="imageLoader">
+          <input id="imageLoader" type="file" accept="image/*">
+          <span class="upload-icon" aria-hidden="true">＋</span>
+          <strong>Choose an image</strong>
+          <span>or drop it here</span>
+        </label>
+
+        <section class="control-section">
+          <h2>Dither</h2>
+          <div class="select-control">
+            <label for="algorithm">Error diffusion</label>
+            <select id="algorithm">
+              <option value="none">None</option>
+              <option value="simple">Simple</option>
+              <option value="box">Box</option>
+              <option value="atkinson" selected>Atkinson</option>
+              <option value="burkes">Burkes</option>
+              <option value="floyd">Floyd–Steinberg</option>
+              <option value="stucki">Stucki</option>
+              <option value="pidgeon">Pidgeon</option>
+              <option value="jjn">Jarvis–Judice–Ninke</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="control-section">
+          <h2>Bayer</h2>
+          <div class="select-control">
+            <label for="bayerSize">Matrix size</label>
+            <select id="bayerSize">
+              <option value="0">None</option>
+              <option value="2">2 × 2</option>
+              <option value="4" selected>4 × 4</option>
+              <option value="8">8 × 8</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <div class="label-row">
+              <label for="bayerAmount">Amount</label>
+              <input id="bayerAmountValue" class="number-input" type="number" min="0" max="100" step="1" value="20" inputmode="numeric" aria-label="Bayer amount exact value">
+            </div>
+            <input id="bayerAmount" type="range" min="0" max="100" value="20">
+          </div>
+        </section>
+
+        <section class="control-section">
+          <h2>Adjust</h2>
+          <div class="control-group compact">
+            <div class="label-row">
+              <label for="exposure">Exposure</label>
+              <input id="exposureValue" class="number-input" type="number" min="-100" max="100" step="1" value="0" inputmode="numeric">
+            </div>
+            <input id="exposure" type="range" min="-100" max="100" value="0">
+          </div>
+          <div class="control-group compact">
+            <div class="label-row">
+              <label for="brightness">Brightness</label>
+              <input id="brightnessValue" class="number-input" type="number" min="-100" max="100" step="1" value="0" inputmode="numeric">
+            </div>
+            <input id="brightness" type="range" min="-100" max="100" value="0">
+          </div>
+          <div class="control-group compact">
+            <div class="label-row">
+              <label for="contrast">Contrast</label>
+              <input id="contrastValue" class="number-input" type="number" min="-100" max="100" step="1" value="0" inputmode="numeric">
+            </div>
+            <input id="contrast" type="range" min="-100" max="100" value="0">
+          </div>
+        </section>
+
+        <section class="control-section">
+          <h2>Output</h2>
+          <div class="control-group compact">
+            <div class="label-row">
+              <label for="zoom">Pixel scale</label>
+              <output id="zoomValue">200%</output>
+            </div>
+            <input id="zoom" type="range" min="1" max="10" value="2">
+          </div>
+          <div class="dimension-grid">
+            <label for="outWidth">Width <input id="outWidth" type="number" min="1" step="1" value="400" inputmode="numeric"></label>
+            <label for="outHeight">Height <input id="outHeight" type="number" min="1" step="1" value="240" inputmode="numeric" disabled></label>
+          </div>
+          <label class="check-control">
+            <input id="autoHeight" type="checkbox" checked>
+            <span>Keep source aspect ratio</span>
+          </label>
+        </section>
+
+        <button id="downloadBtn" class="primary full-width" type="button" disabled>Download PNG</button>
+      </aside>
+
+      <section class="panel preview-panel">
+        <div class="preview-toolbar">
+          <div>
+            <strong>Preview</strong>
+            <span id="dimensions">No image loaded</span>
+          </div>
+          <fieldset class="view-switch" aria-label="Preview mode">
+            <label><input type="radio" name="previewMode" value="dithered" checked><span>Dithered</span></label>
+            <label><input type="radio" name="previewMode" value="original"><span>Original</span></label>
+            <label><input type="radio" name="previewMode" value="side-by-side"><span>Side-by-side</span></label>
+          </fieldset>
+        </div>
+        <div class="canvas-stage" id="canvasStage">
+          <div class="empty-state" id="emptyState">
+            <span aria-hidden="true">▦</span>
+            <p>Your dithers will appear here.</p>
+          </div>
+          <canvas id="displayCanvas" aria-label="Dithered image" hidden></canvas>
+          <canvas id="originalCanvas" aria-label="Original image" hidden></canvas>
+        </div>
+      </section>
+    </section>
+
+    <footer>Open source under the MIT License. © 2026 daniel-meek.</footer>
+  </main>
+  
+  <!-- -----------------------------------------------------------------------------
+    JavaScript Section
+  ------------------------------------------------------------------------------ -->
+
+  <script>
+    "use strict";
+
+    const DITHER_MATRICES = {
+      none: [],
+      simple: [{ dx: 1, dy: 0, w: 1 }],
+      box: [{ dx: 1, dy: 0, w: 0.5 }, { dx: 0, dy: 1, w: 0.5 }],
+      atkinson: [
+        { dx: 1, dy: 0, w: 1 / 8 }, { dx: 2, dy: 0, w: 1 / 8 },
+        { dx: -1, dy: 1, w: 1 / 8 }, { dx: 0, dy: 1, w: 1 / 8 },
+        { dx: 1, dy: 1, w: 1 / 8 }, { dx: 0, dy: 2, w: 1 / 8 }
+      ],
+      floyd: [
+        { dx: 1, dy: 0, w: 7 / 16 }, { dx: -1, dy: 1, w: 3 / 16 },
+        { dx: 0, dy: 1, w: 5 / 16 }, { dx: 1, dy: 1, w: 1 / 16 }
+      ],
+      burkes: [
+        { dx: 1, dy: 0, w: 8 / 32 }, { dx: 2, dy: 0, w: 4 / 32 },
+        { dx: -2, dy: 1, w: 2 / 32 }, { dx: -1, dy: 1, w: 4 / 32 },
+        { dx: 0, dy: 1, w: 8 / 32 }, { dx: 1, dy: 1, w: 4 / 32 },
+        { dx: 2, dy: 1, w: 2 / 32 }
+      ],
+      stucki: [
+        { dx: 1, dy: 0, w: 8 / 42 }, { dx: 2, dy: 0, w: 4 / 42 },
+        { dx: -2, dy: 1, w: 2 / 42 }, { dx: -1, dy: 1, w: 4 / 42 },
+        { dx: 0, dy: 1, w: 8 / 42 }, { dx: 1, dy: 1, w: 4 / 42 },
+        { dx: 2, dy: 1, w: 2 / 42 }, { dx: -2, dy: 2, w: 1 / 42 },
+        { dx: -1, dy: 2, w: 2 / 42 }, { dx: 0, dy: 2, w: 4 / 42 },
+        { dx: 1, dy: 2, w: 2 / 42 }, { dx: 2, dy: 2, w: 1 / 42 }
+      ],
+      pidgeon: [
+        { dx: 1, dy: 0, w: 2 / 4 }, { dx: -1, dy: 1, w: 1 / 4 },
+        { dx: 0, dy: 1, w: 1 / 4 }
+      ],
+      jjn: [
+        { dx: 1, dy: 0, w: 7 / 48 }, { dx: 2, dy: 0, w: 5 / 48 },
+        { dx: -2, dy: 1, w: 3 / 48 }, { dx: -1, dy: 1, w: 5 / 48 },
+        { dx: 0, dy: 1, w: 7 / 48 }, { dx: 1, dy: 1, w: 5 / 48 },
+        { dx: 2, dy: 1, w: 3 / 48 }, { dx: -2, dy: 2, w: 1 / 48 },
+        { dx: -1, dy: 2, w: 3 / 48 }, { dx: 0, dy: 2, w: 5 / 48 },
+        { dx: 1, dy: 2, w: 3 / 48 }, { dx: 2, dy: 2, w: 1 / 48 }
+      ]
+    };
+
+    const BAYER_MATRICES = {
+      0: [[0]],
+      2: [[0, 2], [3, 1]],
+      4: [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]],
+      8: [
+        [0, 32, 8, 40, 2, 34, 10, 42], [48, 16, 56, 24, 50, 18, 58, 26],
+        [12, 44, 4, 36, 14, 46, 6, 38], [60, 28, 52, 20, 62, 30, 54, 22],
+        [3, 35, 11, 43, 1, 33, 9, 41], [51, 19, 59, 27, 49, 17, 57, 25],
+        [15, 47, 7, 39, 13, 45, 5, 37], [63, 31, 55, 23, 61, 29, 53, 21]
+      ]
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const ui = {
+      imageLoader: $("#imageLoader"), displayCanvas: $("#displayCanvas"), originalCanvas: $("#originalCanvas"),
+      exposure: $("#exposure"), brightness: $("#brightness"), contrast: $("#contrast"),
+      bayerSize: $("#bayerSize"), bayerAmount: $("#bayerAmount"), algorithm: $("#algorithm"),
+      zoom: $("#zoom"), outWidth: $("#outWidth"), outHeight: $("#outHeight"),
+      autoHeight: $("#autoHeight"), downloadBtn: $("#downloadBtn")
+    };
+    const valueInputs = {
+      exposure: $("#exposureValue"), brightness: $("#brightnessValue"),
+      contrast: $("#contrastValue"), bayerAmount: $("#bayerAmountValue")
+    };
+    const displayContext = ui.displayCanvas.getContext("2d", { willReadFrequently: true });
+    const originalContext = ui.originalCanvas.getContext("2d");
+    const previewModeInputs = [...document.querySelectorAll('input[name="previewMode"]')];
+    const canvasStage = $("#canvasStage");
+    let sourceImage = null;
+    let sourceName = "dithered-output";
+    let processFrame = 0;
+
+    function bindRangeAndNumber(range, number) {
+      range.addEventListener("input", () => { number.value = range.value; scheduleProcess(); });
+      number.addEventListener("input", () => {
+        const value = Number(number.value);
+        if (!Number.isFinite(value)) return;
+        range.value = Math.max(Number(range.min), Math.min(Number(range.max), value));
+        scheduleProcess();
+      });
+    }
+
+    Object.keys(valueInputs).forEach((key) => bindRangeAndNumber(ui[key], valueInputs[key]));
+    ui.zoom.addEventListener("input", () => { $("#zoomValue").value = `${Number(ui.zoom.value) * 100}%`; scheduleProcess(); });
+    [ui.algorithm, ui.bayerSize].forEach((control) => control.addEventListener("input", scheduleProcess));
+    ui.outHeight.addEventListener("input", scheduleProcess);
+    ui.outWidth.addEventListener("input", () => { if (ui.autoHeight.checked) calculateAspect(); scheduleProcess(); });
+    ui.autoHeight.addEventListener("change", () => { ui.outHeight.disabled = ui.autoHeight.checked; if (ui.autoHeight.checked) calculateAspect(); scheduleProcess(); });
+    previewModeInputs.forEach((input) => input.addEventListener("change", renderPreviewMode));
+
+    $("#themeButton").addEventListener("click", () => {
+      const root = document.documentElement;
+      root.dataset.theme = root.dataset.theme === "light" ? "dark" : "light";
+    });
+
+    ui.imageLoader.addEventListener("change", () => { if (ui.imageLoader.files[0]) loadFile(ui.imageLoader.files[0]); });
+    const dropZone = $("#dropZone");
+    ["dragenter", "dragover"].forEach((eventName) => dropZone.addEventListener(eventName, (event) => { event.preventDefault(); dropZone.classList.add("is-dragging"); }));
+    ["dragleave", "drop"].forEach((eventName) => dropZone.addEventListener(eventName, (event) => { event.preventDefault(); dropZone.classList.remove("is-dragging"); }));
+    dropZone.addEventListener("drop", (event) => {
+      const file = [...event.dataTransfer.files].find((item) => item.type.startsWith("image/"));
+      if (file) loadFile(file);
+    });
+
+    function loadFile(file) {
+      if (!file.type.startsWith("image/")) return;
+      const url = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        sourceImage = image;
+        sourceName = file.name.replace(/\.[^.]+$/, "") || "dithered-output";
+        calculateAspect();
+        $("#emptyState").hidden = true;
+        ui.downloadBtn.disabled = false;
+        processImage();
+      };
+      image.onerror = () => URL.revokeObjectURL(url);
+      image.src = url;
+    }
+
+    function calculateAspect() {
+      if (!sourceImage || !ui.autoHeight.checked) return;
+      ui.outHeight.value = Math.max(1, Math.round(Number(ui.outWidth.value) * sourceImage.naturalHeight / sourceImage.naturalWidth));
+    }
+
+    function scheduleProcess() {
+      cancelAnimationFrame(processFrame);
+      processFrame = requestAnimationFrame(processImage);
+    }
+
+    function processImage() {
+      if (!sourceImage) return;
+      const width = Math.max(1, Math.floor(Number(ui.outWidth.value) || 1));
+      const height = Math.max(1, Math.floor(Number(ui.outHeight.value) || 1));
+      const zoom = Math.max(1, Math.floor(Number(ui.zoom.value) || 1));
+      const offCanvas = document.createElement("canvas");
+      offCanvas.width = width;
+      offCanvas.height = height;
+      const offContext = offCanvas.getContext("2d", { willReadFrequently: true });
+      offContext.imageSmoothingEnabled = true;
+      offContext.drawImage(sourceImage, 0, 0, width, height);
+      const sourceData = offContext.getImageData(0, 0, width, height).data;
+      const luminance = new Float32Array(width * height);
+      const exposure = Number(ui.exposure.value);
+      const brightness = Number(ui.brightness.value);
+      const contrast = Number(ui.contrast.value);
+      const contrastFactor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+      for (let index = 0; index < sourceData.length; index += 4) {
+        let red = sourceData[index] + exposure + brightness;
+        let green = sourceData[index + 1] + exposure + brightness;
+        let blue = sourceData[index + 2] + exposure + brightness;
+        red = contrastFactor * (red - 128) + 128;
+        green = contrastFactor * (green - 128) + 128;
+        blue = contrastFactor * (blue - 128) + 128;
+        luminance[index / 4] = clamp(0.299 * red + 0.587 * green + 0.114 * blue, 0, 255);
+      }
+
+      const bayerSize = Number(ui.bayerSize.value);
+      const bayerAmount = Number(ui.bayerAmount.value) / 100;
+      const bayerMatrix = BAYER_MATRICES[bayerSize];
+      const bayerMax = Math.max(1, bayerSize * bayerSize);
+      const errorMatrix = DITHER_MATRICES[ui.algorithm.value] || [];
+
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const index = y * width + x;
+          const oldPixel = luminance[index];
+          let threshold = 128;
+          if (bayerSize > 0) threshold += (bayerMatrix[y % bayerSize][x % bayerSize] / bayerMax - 0.5) * 255 * bayerAmount;
+          const newPixel = oldPixel < threshold ? 0 : 255;
+          const error = oldPixel - newPixel;
+          luminance[index] = newPixel;
+          for (const node of errorMatrix) {
+            const nextX = x + node.dx;
+            const nextY = y + node.dy;
+            if (nextX >= 0 && nextX < width && nextY >= 0 && nextY < height) luminance[nextY * width + nextX] += error * node.w;
+          }
+        }
+      }
+
+      ui.displayCanvas.width = width * zoom;
+      ui.displayCanvas.height = height * zoom;
+      const output = displayContext.createImageData(width * zoom, height * zoom);
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const value = luminance[y * width + x];
+          for (let zoomY = 0; zoomY < zoom; zoomY += 1) {
+            for (let zoomX = 0; zoomX < zoom; zoomX += 1) {
+              const outputIndex = ((y * zoom + zoomY) * width * zoom + x * zoom + zoomX) * 4;
+              output.data[outputIndex] = value;
+              output.data[outputIndex + 1] = value;
+              output.data[outputIndex + 2] = value;
+              output.data[outputIndex + 3] = 255;
+            }
+          }
+        }
+      }
+      displayContext.putImageData(output, 0, 0);
+
+      ui.originalCanvas.width = width * zoom;
+      ui.originalCanvas.height = height * zoom;
+      originalContext.imageSmoothingEnabled = false;
+      originalContext.drawImage(sourceImage, 0, 0, width * zoom, height * zoom);
+      $("#dimensions").textContent = `${width} × ${height} px · ${zoom}× scale · ${width * zoom} × ${height * zoom} export`;
+      renderPreviewMode();
+    }
+
+    function renderPreviewMode() {
+      if (!sourceImage) return;
+      const mode = previewModeInputs.find((input) => input.checked)?.value || "dithered";
+      ui.displayCanvas.hidden = mode === "original";
+      ui.originalCanvas.hidden = mode === "dithered";
+      const comparison = mode === "side-by-side";
+      const portrait = sourceImage.naturalHeight > sourceImage.naturalWidth;
+      canvasStage.classList.toggle("is-side-by-side", comparison);
+      canvasStage.classList.toggle("side-horizontal", comparison && portrait);
+      canvasStage.classList.toggle("side-vertical", comparison && !portrait);
+    }
+
+    ui.downloadBtn.addEventListener("click", () => {
+      if (!sourceImage) return;
+      ui.displayCanvas.toBlob((blob) => {
+        if (!blob) return;
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = `${sourceName}-dithered.png`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }, "image/png");
+    });
+
+    function clamp(value, minimum, maximum) { return Math.min(maximum, Math.max(minimum, value)); }
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Triangle Recreator</title>
+
+  <!-- -----------------------------------------------------------------------------
+    Style Section
+  ------------------------------------------------------------------------------ -->
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1115;
+      --panel: rgba(25, 28, 34, 0.92);
+      --panel-solid: #191c22;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --line: #303640;
+      --accent: #7c9cff;
+      --accent-hover: #98afff;
+      --soft: #252d49;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+    }
+
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f5f6f8;
+      --panel: rgba(255, 255, 255, 0.9);
+      --panel-solid: #ffffff;
+      --text: #15171a;
+      --muted: #6b7280;
+      --line: #dfe3e8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --soft: #eef2ff;
+      --shadow: 0 18px 45px rgba(24, 32, 48, 0.09);
+      --radius: 20px;
+    }
+
+    
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 34rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input { font: inherit; }
+    button { border: 0; }
+
+    .app-shell { width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 28px; }
+    .hero { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 28px; }
+    .eyebrow { margin: 0 0 8px; color: var(--accent); font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(2rem, 5vw, 4rem); letter-spacing: -.055em; line-height: .98; }
+    .intro { max-width: 680px; margin: 16px 0 0; color: var(--muted); font-size: 1.05rem; line-height: 1.6; }
+    .icon-button { width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; background: var(--panel); color: var(--text); cursor: pointer; }
+
+    .workspace { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 20px; align-items: stretch; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); backdrop-filter: blur(16px); }
+    .controls { padding: 20px; }
+
+    .drop-zone { display: grid; place-items: center; min-height: 150px; padding: 20px; border: 1.5px dashed var(--line); border-radius: 16px; background: color-mix(in srgb, var(--panel-solid) 74%, transparent); cursor: pointer; text-align: center; transition: .2s ease; }
+    .drop-zone:hover, .drop-zone.is-dragging { border-color: var(--accent); background: var(--soft); transform: translateY(-1px); }
+    .drop-zone input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .drop-zone span:last-child { margin-top: 4px; color: var(--muted); font-size: .85rem; }
+    .upload-icon { display: grid; place-items: center; width: 36px; height: 36px; margin-bottom: 9px; border-radius: 10px; background: var(--soft); color: var(--accent); font-size: 1.35rem; }
+
+    .control-group { margin-top: 22px; }
+    .control-title { display: block; margin-bottom: 9px; font-size: .9rem; font-weight: 700; }
+    .mode-switch { display: flex; width: 100%; }
+    .mode-switch label { flex: 1; text-align: center; }
+    .label-row { display: flex; justify-content: space-between; gap: 12px; }
+    .label-row label { font-size: .9rem; font-weight: 700; }
+    .label-row output { color: var(--accent); font-size: .85rem; font-weight: 800; }
+    .number-input { width: 86px; min-height: 34px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-solid); color: var(--accent); font-size: .85rem; font-weight: 800; text-align: right; }
+    .number-input:focus { border-color: var(--accent); outline: 2px solid color-mix(in srgb, var(--accent) 22%, transparent); outline-offset: 1px; }
+    .control-group small { display: block; margin-top: 7px; color: var(--muted); font-size: .75rem; line-height: 1.4; }
+    input[type="range"] { width: 100%; margin: 11px 0 0; accent-color: var(--accent); }
+
+    .actions, .download-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 22px; }
+    button.primary, button.secondary { min-height: 44px; padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 750; transition: .18s ease; }
+    button.primary { background: var(--accent); color: white; }
+    button.primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+    button.secondary { border: 1px solid var(--line); background: var(--panel-solid); color: var(--text); }
+    button.secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    button:disabled { cursor: not-allowed; opacity: .42; }
+    .progress-wrap { margin-top: 20px; }
+    .status-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 18px; color: var(--muted); font-size: .76rem; line-height: 1; white-space: nowrap; }
+    .status-row span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .status-row span:last-child { font-variant-numeric: tabular-nums; text-align: right; }
+    progress { width: 100%; height: 8px; margin-top: 9px; border: 0; border-radius: 99px; overflow: hidden; background: var(--line); }
+    progress::-webkit-progress-bar { background: var(--line); }
+    progress::-webkit-progress-value { background: var(--accent); border-radius: 99px; }
+    progress::-moz-progress-bar { background: var(--accent); border-radius: 99px; }
+
+    .preview-panel { min-height: 640px; overflow: hidden; }
+    .preview-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 68px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .preview-toolbar strong { display: block; }
+    .preview-toolbar div span { display: block; margin-top: 3px; color: var(--muted); font-size: .78rem; }
+    .view-switch { display: inline-flex; margin: 0; padding: 3px; border: 1px solid var(--line); border-radius: 11px; background: var(--bg); }
+    .view-switch label { cursor: pointer; }
+    .view-switch input { position: absolute; opacity: 0; pointer-events: none; }
+    .view-switch span { display: block; padding: 7px 10px; border-radius: 8px; color: var(--muted); font-size: .78rem; font-weight: 700; transition: .18s ease; }
+    .view-switch input:checked + span { background: var(--panel-solid); color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,.09); }
+    .view-switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .canvas-stage { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; min-height: 570px; padding: 24px; background-image: linear-gradient(45deg, color-mix(in srgb, var(--line) 28%, transparent) 25%, transparent 25%), linear-gradient(-45deg, color-mix(in srgb, var(--line) 28%, transparent) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, color-mix(in srgb, var(--line) 28%, transparent) 75%), linear-gradient(-45deg, transparent 75%, color-mix(in srgb, var(--line) 28%, transparent) 75%); background-position: 0 0, 0 8px, 8px -8px, -8px 0; background-size: 16px 16px; }
+    canvas[hidden] { display: none !important; }
+    canvas { display: block; max-width: 100%; max-height: 520px; width: auto; height: auto; border-radius: 4px; box-shadow: 0 12px 32px rgba(0,0,0,.18); }
+    .empty-state { color: var(--muted); text-align: center; }
+    .empty-state span { display: block; color: var(--accent); font-size: 5rem; font-weight: 200; line-height: 1; }
+    .empty-state p { margin: 12px 0 0; }
+    .canvas-stage.is-side-by-side.side-horizontal { flex-direction: row; flex-wrap: nowrap; }
+    .canvas-stage.is-side-by-side.side-horizontal canvas { max-width: calc(50% - 9px); }
+    .canvas-stage.is-side-by-side.side-vertical { flex-direction: column; flex-wrap: nowrap; }
+    .canvas-stage.is-side-by-side.side-vertical canvas { max-width: 100%; max-height: 245px; }
+    footer { padding-top: 20px; color: var(--muted); font-size: .78rem; text-align: center; }
+
+    @media (max-width: 850px) {
+      .app-shell { width: min(100% - 20px, 680px); padding-top: 28px; }
+      .workspace { grid-template-columns: 1fr; }
+      .preview-panel { min-height: 420px; }
+      .canvas-stage { min-height: 350px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero { align-items: center; }
+      .intro { font-size: .95rem; }
+      .actions, .download-group { grid-template-columns: 1fr; }
+      .preview-toolbar { align-items: flex-start; flex-direction: column; }
+      .view-switch { width: 100%; }
+      .view-switch label { flex: 1; text-align: center; }
+      .canvas-stage.is-side-by-side.side-vertical canvas { max-width: 100%; }
+    }
+  </style>
+
+</head>
+
+  <!-- -----------------------------------------------------------------------------
+    HTML Section
+  ------------------------------------------------------------------------------ -->
+
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Image Tool</p>
+        <h1>Triangle Recreator</h1>
+        <p class="intro">Approximate an image with a collection of random triangles.</p>
+      </div>
+      <button id="themeButton" class="icon-button" type="button" aria-label="Toggle colour theme" title="Toggle colour theme">◐</button>
+    </header>
+
+    <section class="workspace" aria-label="Triangle image generator">
+      <aside class="panel controls">
+        <label class="drop-zone" id="dropZone" for="imageInput">
+          <input id="imageInput" type="file" accept="image/*">
+          <span class="upload-icon" aria-hidden="true">＋</span>
+          <strong>Choose an image</strong>
+          <span>or drop it here</span>
+        </label>
+
+        <div class="control-group mode-control">
+          <span class="control-title">Comparison method</span>
+          <fieldset class="view-switch mode-switch" aria-label="Image comparison method">
+            <label><input type="radio" name="scoreMode" value="pixel" checked><span>Pixel</span></label>
+            <label><input type="radio" name="scoreMode" value="ssim"><span>SSIM</span></label>
+          </fieldset>
+        </div>
+
+        <div class="control-group">
+          <div class="label-row">
+            <label for="candidateCount">Random Triangle Candidates</label>
+            <input id="candidateValue" class="number-input" type="number" min="0" step="1" value="50" inputmode="numeric" aria-label="Random candidates exact value">
+          </div>
+          <input id="candidateCount" type="range" min="0" max="200" value="50">
+          <!-- <small>Number of random triangle candidates</small> -->
+        </div>
+
+        <div class="control-group">
+          <div class="label-row">
+            <label for="adjustmentCount">Random Adjustments</label>
+            <input id="adjustmentValue" class="number-input" type="number" min="0" step="1" value="50" inputmode="numeric" aria-label="Adjustments exact value">
+          </div>
+          <input id="adjustmentCount" type="range" min="0" max="200" value="50">
+        </div>
+
+        <div class="control-group">
+          <div class="label-row">
+            <label for="triangleCount">Triangles</label>
+            <input id="triangleValue" class="number-input" type="number" min="0" step="1" value="500" inputmode="numeric" aria-label="Triangle count exact value">
+          </div>
+          <input id="triangleCount" type="range" min="0" max="1000" step="10" value="500">
+        </div>
+
+        <div class="control-group">
+          <div class="label-row">
+            <label for="scoreThreshold">Minimum Score Gain</label>
+            <input id="scoreThresholdValue" class="number-input" type="number" min="-1000" max="1000" step="0.01" value="0.25" aria-label="Minimum score gain exact value">
+          </div>
+          <input id="scoreThreshold" type="range" min="-10" max="10" step="0.05" value="0.25">
+        </div>
+
+        <div class="actions">
+          <button id="startButton" class="primary" type="button" disabled>Start</button>
+          <button id="stopButton" class="secondary" type="button" disabled>Stop</button>
+        </div>
+
+        <div class="progress-wrap" aria-live="polite">
+          <div class="status-row">
+            <span id="statusText">Choose an image to begin</span>
+            <span id="progressText">0 / 0</span>
+          </div>
+          <progress id="progressBar" max="1" value="0"></progress>
+        </div>
+
+        <div class="download-group">
+          <button id="pngButton" class="secondary" type="button" disabled>Download PNG</button>
+          <button id="svgButton" class="secondary" type="button" disabled>Download SVG</button>
+        </div>
+      </aside>
+
+      <section class="panel preview-panel">
+        <div class="preview-toolbar">
+          <div>
+            <strong>Preview</strong>
+            <span id="dimensions">No image loaded</span>
+          </div>
+          <fieldset class="view-switch" aria-label="Preview mode">
+            <label><input type="radio" name="previewMode" value="generated" checked><span>Generated</span></label>
+            <label><input type="radio" name="previewMode" value="original"><span>Original</span></label>
+            <label><input type="radio" name="previewMode" value="side-by-side"><span>Side-by-side</span></label>
+          </fieldset>
+        </div>
+        <div class="canvas-stage" id="canvasStage">
+          <div class="empty-state" id="emptyState">
+            <span aria-hidden="true">△</span>
+            <p>Your triangles will appear here.</p>
+          </div>
+          <canvas id="displayCanvas" aria-label="Generated triangle image" hidden></canvas>
+          <canvas id="originalCanvas" aria-label="Original image" hidden></canvas>
+        </div>
+      </section>
+    </section>
+
+    <footer>Open source under the MIT License. © 2026 daniel-meek.</footer>
+  </main>
+  
+  <!-- -----------------------------------------------------------------------------
+    JavaScript Section
+  ------------------------------------------------------------------------------ -->
+
+  <script>
+    "use strict";
+
+    const $ = (selector) => document.querySelector(selector);
+    const imageInput = $("#imageInput");
+    const dropZone = $("#dropZone");
+    const displayCanvas = $("#displayCanvas");
+    const displayContext = displayCanvas.getContext("2d", { alpha: false });
+    const originalCanvas = $("#originalCanvas");
+    const originalContext = originalCanvas.getContext("2d", { alpha: false });
+    const canvasStage = $("#canvasStage");
+    const emptyState = $("#emptyState");
+    const startButton = $("#startButton");
+    const stopButton = $("#stopButton");
+    const pngButton = $("#pngButton");
+    const svgButton = $("#svgButton");
+    const previewModeInputs = [...document.querySelectorAll('input[name="previewMode"]')];
+    const progressBar = $("#progressBar");
+    const progressText = $("#progressText");
+    const statusText = $("#statusText");
+    const dimensions = $("#dimensions");
+    const scoreThreshold = $("#scoreThreshold");
+    const scoreThresholdValue = $("#scoreThresholdValue");
+    const scoreModeInputs = [...document.querySelectorAll('input[name="scoreMode"]')];
+    const modeDescription = $("#modeDescription");
+
+    const controls = {
+      candidate: $("#candidateValue"),
+      adjustment: $("#adjustmentValue"),
+      triangle: $("#triangleValue")
+    };
+
+    const sliders = {
+      candidate: $("#candidateCount"),
+      adjustment: $("#adjustmentCount"),
+      triangle: $("#triangleCount")
+    };
+
+    const state = {
+      image: null,
+      originalPixels: null,
+      triangles: [],
+      working: false,
+      cancelled: false,
+      evalWidth: 0,
+      evalHeight: 0,
+      sourceName: "triangle-recreation"
+    };
+
+    const sourceCanvas = document.createElement("canvas");
+    const sourceContext = sourceCanvas.getContext("2d", { willReadFrequently: true, alpha: false });
+    const evalCanvas = document.createElement("canvas");
+    const evalContext = evalCanvas.getContext("2d", { willReadFrequently: true, alpha: false });
+
+    function bindRangeAndNumber(slider, numberInput) {
+      const syncNumber = () => { numberInput.value = slider.value; };
+      const syncSlider = () => {
+        const parsed = Number.parseInt(numberInput.value, 10);
+        if (!Number.isFinite(parsed) || parsed < 0) return;
+        const integer = Math.floor(parsed);
+        numberInput.value = integer;
+        slider.value = Math.min(integer, Number(slider.max));
+      };
+      slider.addEventListener("input", syncNumber);
+      numberInput.addEventListener("input", syncSlider);
+      numberInput.addEventListener("blur", () => {
+        if (numberInput.value === "" || Number(numberInput.value) < 0) numberInput.value = 0;
+        syncSlider();
+      });
+    }
+
+    Object.keys(controls).forEach((key) => bindRangeAndNumber(sliders[key], controls[key]));
+
+    function syncThresholdFromSlider() {
+      scoreThresholdValue.value = Number(scoreThreshold.value).toFixed(2);
+    }
+
+    function syncThresholdFromNumber() {
+      const parsed = Number(scoreThresholdValue.value);
+      if (!Number.isFinite(parsed) || parsed < 0) return;
+      scoreThresholdValue.value = parsed;
+      scoreThreshold.value = Math.min(parsed, Number(scoreThreshold.max));
+    }
+
+    scoreThreshold.addEventListener("input", syncThresholdFromSlider);
+    scoreThresholdValue.addEventListener("input", syncThresholdFromNumber);
+    scoreThresholdValue.addEventListener("blur", () => {
+      if (scoreThresholdValue.value === "" || Number(scoreThresholdValue.value) < 0) {
+        scoreThresholdValue.value = 0;
+      }
+      syncThresholdFromNumber();
+    });
+
+    scoreModeInputs.forEach((input) => input.addEventListener("change", () => {
+      modeDescription.textContent = input.value === "ssim"
+        ? "Local 8 × 8 luminance SSIM. Higher structural similarity is better."
+        : "RGB mean squared error. Lower error is better.";
+    }));
+
+    $("#themeButton").addEventListener("click", () => {
+      const root = document.documentElement;
+      root.dataset.theme = root.dataset.theme === "light" ? "dark" : "light";
+    });
+
+    imageInput.addEventListener("change", () => {
+      if (imageInput.files[0]) loadFile(imageInput.files[0]);
+    });
+
+    ["dragenter", "dragover"].forEach((eventName) => dropZone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropZone.classList.add("is-dragging");
+    }));
+
+    ["dragleave", "drop"].forEach((eventName) => dropZone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropZone.classList.remove("is-dragging");
+    }));
+
+    dropZone.addEventListener("drop", (event) => {
+      const file = [...event.dataTransfer.files].find((item) => item.type.startsWith("image/"));
+      if (file) loadFile(file);
+    });
+
+    async function loadFile(file) {
+      if (!file.type.startsWith("image/")) return setStatus("Please choose a valid image file.");
+      state.cancelled = true;
+      const url = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        state.image = image;
+        state.sourceName = file.name.replace(/\.[^.]+$/, "") || "triangle-recreation";
+        prepareCanvases(image);
+        state.triangles = [];
+        state.working = false;
+        state.cancelled = false;
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        pngButton.disabled = true;
+        svgButton.disabled = true;
+        setPreviewMode("generated");
+        progressBar.value = 0;
+        progressText.textContent = "0 / 0";
+        dimensions.textContent = `${image.naturalWidth} × ${image.naturalHeight} px`;
+        emptyState.hidden = true;
+        displayCanvas.hidden = false;
+        drawGenerated();
+        renderPreviewMode();
+        setStatus("Ready to generate");
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        setStatus("This image could not be opened.");
+      };
+      image.src = url;
+    }
+
+    function prepareCanvases(image) {
+      // Step 0: the export/display canvas exactly matches the input dimensions.
+      displayCanvas.width = image.naturalWidth;
+      displayCanvas.height = image.naturalHeight;
+      originalCanvas.width = image.naturalWidth;
+      originalCanvas.height = image.naturalHeight;
+      originalContext.fillStyle = "#ffffff";
+      originalContext.fillRect(0, 0, originalCanvas.width, originalCanvas.height);
+      originalContext.drawImage(image, 0, 0);
+      sourceCanvas.width = image.naturalWidth;
+      sourceCanvas.height = image.naturalHeight;
+      sourceContext.fillStyle = "#ffffff";
+      sourceContext.fillRect(0, 0, sourceCanvas.width, sourceCanvas.height);
+      sourceContext.drawImage(image, 0, 0);
+
+      // Fitness evaluation is deliberately downsampled for responsive, offline execution.
+      const maxSide = 144;
+      const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+      state.evalWidth = Math.max(1, Math.round(image.naturalWidth * scale));
+      state.evalHeight = Math.max(1, Math.round(image.naturalHeight * scale));
+      evalCanvas.width = state.evalWidth;
+      evalCanvas.height = state.evalHeight;
+      evalContext.fillStyle = "#ffffff";
+      evalContext.fillRect(0, 0, state.evalWidth, state.evalHeight);
+
+      const targetCanvas = document.createElement("canvas");
+      targetCanvas.width = state.evalWidth;
+      targetCanvas.height = state.evalHeight;
+      const targetContext = targetCanvas.getContext("2d", { willReadFrequently: true, alpha: false });
+      targetContext.fillStyle = "#ffffff";
+      targetContext.fillRect(0, 0, state.evalWidth, state.evalHeight);
+      targetContext.drawImage(image, 0, 0, state.evalWidth, state.evalHeight);
+      state.originalPixels = targetContext.getImageData(0, 0, state.evalWidth, state.evalHeight).data;
+    }
+
+    startButton.addEventListener("click", runGeneration);
+    stopButton.addEventListener("click", () => {
+      state.cancelled = true;
+      setStatus("Stopping after this iteration…");
+    });
+    previewModeInputs.forEach((input) => input.addEventListener("change", renderPreviewMode));
+    pngButton.addEventListener("click", downloadPng);
+    svgButton.addEventListener("click", downloadSvg);
+
+    async function runGeneration() {
+      if (!state.image || state.working) return;
+      state.working = true;
+      state.cancelled = false;
+      state.triangles = [];
+      startButton.disabled = true;
+      stopButton.disabled = false;
+      pngButton.disabled = true;
+      svgButton.disabled = true;
+      setPreviewMode("generated");
+      setInputsDisabled(true);
+
+      evalContext.fillStyle = "#ffffff";
+      evalContext.fillRect(0, 0, state.evalWidth, state.evalHeight);
+
+      const candidateCount = Number(controls.candidate.value);
+      const adjustmentCount = Number(controls.adjustment.value);
+      const triangleCount = Number(controls.triangle.value);
+      const minimumScoreGain = Math.max(0, Number(scoreThresholdValue.value) || 0);
+      const scoreMode = scoreModeInputs.find((input) => input.checked)?.value || "pixel";
+      let rejectedCount = 0;
+      progressBar.max = Math.max(1, triangleCount);
+      progressBar.value = 0;
+
+      for (let iteration = 0; iteration < triangleCount && !state.cancelled; iteration += 1) {
+        setStatus(`Selecting triangle ${iteration + 1}`);
+        const baseline = evalContext.getImageData(0, 0, state.evalWidth, state.evalHeight);
+        const baselineScore = scoreImage(baseline.data, scoreMode);
+
+        // Step 1: test X random triangles and retain the lowest-error candidate.
+        let winner = null;
+        let winnerScore = Infinity;
+        // A zero X value still needs one seed so Y mutations and triangle generation remain valid.
+        const candidateAttempts = Math.max(1, candidateCount);
+        for (let attempt = 0; attempt < candidateAttempts; attempt += 1) {
+          const candidate = randomTriangle(baseline.data);
+          const score = scoreCandidate(baseline, candidate, scoreMode);
+          if (score < winnerScore) {
+            winner = candidate;
+            winnerScore = score;
+          }
+        }
+
+        // Step 2: make Y small mutations, always keeping the best version found.
+        for (let adjustment = 0; adjustment < adjustmentCount; adjustment += 1) {
+          const mutated = mutateTriangle(winner, adjustment, adjustmentCount);
+          const score = scoreCandidate(baseline, mutated, scoreMode);
+          if (score < winnerScore) {
+            winner = mutated;
+            winnerScore = score;
+          }
+        }
+
+        // Both metrics are expressed as losses where lower is better.
+        // Pixel gain is reduced RGB MSE; SSIM gain is recovered similarity percentage points.
+        const scoreGain = baselineScore - winnerScore;
+        evalContext.putImageData(baseline, 0, 0);
+        if (scoreGain >= minimumScoreGain) {
+          drawTriangle(evalContext, winner, 1, 1);
+          state.triangles.push(winner);
+        } else {
+          rejectedCount += 1;
+        }
+        progressBar.value = iteration + 1;
+        progressText.textContent = `${iteration + 1} / ${triangleCount}`;
+        setStatus(scoreGain >= minimumScoreGain
+          ? `${state.triangles.length} kept · gain ${scoreGain.toFixed(2)}`
+          : `${rejectedCount} rejected · gain ${scoreGain.toFixed(2)}`);
+
+        if (iteration % 3 === 0 || iteration === triangleCount - 1) {
+          drawGenerated();
+          renderPreviewMode();
+          await nextFrame();
+        }
+      }
+
+      state.working = false;
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      setInputsDisabled(false);
+      const hasResult = state.triangles.length > 0;
+      pngButton.disabled = !hasResult;
+      svgButton.disabled = !hasResult;
+      drawGenerated();
+      renderPreviewMode();
+      setStatus(state.cancelled
+        ? `Stopped · ${state.triangles.length} kept, ${rejectedCount} rejected`
+        : `Complete · ${state.triangles.length} kept, ${rejectedCount} rejected`);
+    }
+
+    function randomTriangle(baselinePixels) {
+      const anchor = chooseErrorWeightedPoint(baselinePixels);
+      const radius = Math.max(state.evalWidth, state.evalHeight) * (0.04 + Math.random() * 0.32);
+      const points = Array.from({ length: 3 }, () => ({
+        x: clamp(anchor.x + randomNormal() * radius, 0, state.evalWidth),
+        y: clamp(anchor.y + randomNormal() * radius, 0, state.evalHeight)
+      }));
+      const sample = sampleTargetColour(anchor.x, anchor.y);
+      const jitter = () => Math.round((Math.random() - 0.5) * 34);
+      return {
+        points,
+        r: clamp(sample[0] + jitter(), 0, 255),
+        g: clamp(sample[1] + jitter(), 0, 255),
+        b: clamp(sample[2] + jitter(), 0, 255),
+        a: 0.12 + Math.random() * 0.58
+      };
+    }
+
+    function chooseErrorWeightedPoint(current) {
+      let best = { x: Math.random() * state.evalWidth, y: Math.random() * state.evalHeight, error: -1 };
+      // A small tournament biases creation toward areas with the largest remaining error.
+      for (let sample = 0; sample < 14; sample += 1) {
+        const x = Math.floor(Math.random() * state.evalWidth);
+        const y = Math.floor(Math.random() * state.evalHeight);
+        const index = (y * state.evalWidth + x) * 4;
+        const dr = state.originalPixels[index] - current[index];
+        const dg = state.originalPixels[index + 1] - current[index + 1];
+        const db = state.originalPixels[index + 2] - current[index + 2];
+        const error = dr * dr + dg * dg + db * db;
+        if (error > best.error) best = { x, y, error };
+      }
+      return best;
+    }
+
+    function sampleTargetColour(x, y) {
+      const px = clamp(Math.round(x), 0, state.evalWidth - 1);
+      const py = clamp(Math.round(y), 0, state.evalHeight - 1);
+      const index = (py * state.evalWidth + px) * 4;
+      return [state.originalPixels[index], state.originalPixels[index + 1], state.originalPixels[index + 2]];
+    }
+
+    function mutateTriangle(triangle, adjustment, total) {
+      const next = structuredCloneTriangle(triangle);
+      const cooling = 1 - adjustment / Math.max(1, total);
+      const coordinateStep = Math.max(0.7, Math.max(state.evalWidth, state.evalHeight) * 0.055 * cooling);
+      const colourStep = Math.max(2, 22 * cooling);
+      const action = Math.floor(Math.random() * 5);
+
+      if (action < 3) {
+        const point = next.points[action];
+        point.x = clamp(point.x + randomNormal() * coordinateStep, 0, state.evalWidth);
+        point.y = clamp(point.y + randomNormal() * coordinateStep, 0, state.evalHeight);
+      } else if (action === 3) {
+        next.r = clamp(next.r + randomNormal() * colourStep, 0, 255);
+        next.g = clamp(next.g + randomNormal() * colourStep, 0, 255);
+        next.b = clamp(next.b + randomNormal() * colourStep, 0, 255);
+      } else {
+        next.a = clamp(next.a + randomNormal() * 0.075 * cooling, 0.03, 0.92);
+      }
+      return next;
+    }
+
+    function scoreCandidate(baseline, triangle, mode) {
+      evalContext.putImageData(baseline, 0, 0);
+      drawTriangle(evalContext, triangle, 1, 1);
+      const pixels = evalContext.getImageData(0, 0, state.evalWidth, state.evalHeight).data;
+      return scoreImage(pixels, mode);
+    }
+
+    function scoreImage(pixels, mode) {
+      return mode === "ssim" ? scoreSsimLoss(pixels) : scorePixelLoss(pixels);
+    }
+
+    function scorePixelLoss(pixels) {
+      let error = 0;
+      for (let index = 0; index < pixels.length; index += 4) {
+        const dr = state.originalPixels[index] - pixels[index];
+        const dg = state.originalPixels[index + 1] - pixels[index + 1];
+        const db = state.originalPixels[index + 2] - pixels[index + 2];
+        error += dr * dr + dg * dg + db * db;
+      }
+      return error / (state.evalWidth * state.evalHeight * 3);
+    }
+
+    function scoreSsimLoss(pixels) {
+      const windowSize = 8;
+      const c1 = (0.01 * 255) ** 2;
+      const c2 = (0.03 * 255) ** 2;
+      let ssimTotal = 0;
+      let windowCount = 0;
+
+      for (let top = 0; top < state.evalHeight; top += windowSize) {
+        for (let left = 0; left < state.evalWidth; left += windowSize) {
+          const right = Math.min(left + windowSize, state.evalWidth);
+          const bottom = Math.min(top + windowSize, state.evalHeight);
+          const count = (right - left) * (bottom - top);
+          let meanOriginal = 0;
+          let meanGenerated = 0;
+
+          for (let y = top; y < bottom; y += 1) {
+            for (let x = left; x < right; x += 1) {
+              const index = (y * state.evalWidth + x) * 4;
+              meanOriginal += luminance(state.originalPixels, index);
+              meanGenerated += luminance(pixels, index);
+            }
+          }
+          meanOriginal /= count;
+          meanGenerated /= count;
+
+          let varianceOriginal = 0;
+          let varianceGenerated = 0;
+          let covariance = 0;
+          for (let y = top; y < bottom; y += 1) {
+            for (let x = left; x < right; x += 1) {
+              const index = (y * state.evalWidth + x) * 4;
+              const originalDelta = luminance(state.originalPixels, index) - meanOriginal;
+              const generatedDelta = luminance(pixels, index) - meanGenerated;
+              varianceOriginal += originalDelta * originalDelta;
+              varianceGenerated += generatedDelta * generatedDelta;
+              covariance += originalDelta * generatedDelta;
+            }
+          }
+          const divisor = Math.max(1, count - 1);
+          varianceOriginal /= divisor;
+          varianceGenerated /= divisor;
+          covariance /= divisor;
+          const numerator = (2 * meanOriginal * meanGenerated + c1) * (2 * covariance + c2);
+          const denominator = (meanOriginal ** 2 + meanGenerated ** 2 + c1) * (varianceOriginal + varianceGenerated + c2);
+          ssimTotal += denominator === 0 ? 1 : numerator / denominator;
+          windowCount += 1;
+        }
+      }
+
+      const meanSsim = ssimTotal / Math.max(1, windowCount);
+      return (1 - meanSsim) * 100;
+    }
+
+    function luminance(pixels, index) {
+      return 0.2126 * pixels[index] + 0.7152 * pixels[index + 1] + 0.0722 * pixels[index + 2];
+    }
+
+    function drawTriangle(context, triangle, scaleX, scaleY) {
+      context.beginPath();
+      context.moveTo(triangle.points[0].x * scaleX, triangle.points[0].y * scaleY);
+      context.lineTo(triangle.points[1].x * scaleX, triangle.points[1].y * scaleY);
+      context.lineTo(triangle.points[2].x * scaleX, triangle.points[2].y * scaleY);
+      context.closePath();
+      context.fillStyle = `rgba(${Math.round(triangle.r)}, ${Math.round(triangle.g)}, ${Math.round(triangle.b)}, ${triangle.a})`;
+      context.fill();
+    }
+
+    function drawGenerated() {
+      if (!state.image) return;
+      displayContext.fillStyle = "#ffffff";
+      displayContext.fillRect(0, 0, displayCanvas.width, displayCanvas.height);
+      const scaleX = displayCanvas.width / state.evalWidth;
+      const scaleY = displayCanvas.height / state.evalHeight;
+      for (const triangle of state.triangles) drawTriangle(displayContext, triangle, scaleX, scaleY);
+    }
+
+    function setPreviewMode(mode) {
+      const input = previewModeInputs.find((item) => item.value === mode);
+      if (input) input.checked = true;
+    }
+
+    function renderPreviewMode() {
+      if (!state.image) return;
+      const mode = previewModeInputs.find((input) => input.checked)?.value || "generated";
+      displayCanvas.hidden = mode === "original";
+      originalCanvas.hidden = mode === "generated";
+      const isSideBySide = mode === "side-by-side";
+      const isPortrait = state.image.naturalHeight > state.image.naturalWidth;
+      canvasStage.classList.toggle("is-side-by-side", isSideBySide);
+      canvasStage.classList.toggle("side-horizontal", isSideBySide && isPortrait);
+      canvasStage.classList.toggle("side-vertical", isSideBySide && !isPortrait);
+    }
+
+    function downloadPng() {
+      drawGenerated();
+      renderPreviewMode();
+      displayCanvas.toBlob((blob) => {
+        if (blob) downloadBlob(blob, `${state.sourceName}-triangles.png`);
+      }, "image/png");
+    }
+
+    function downloadSvg() {
+      const scaleX = displayCanvas.width / state.evalWidth;
+      const scaleY = displayCanvas.height / state.evalHeight;
+      const polygons = state.triangles.map((triangle) => {
+        const points = triangle.points.map((point) => `${format(point.x * scaleX)},${format(point.y * scaleY)}`).join(" ");
+        return `  <polygon points="${points}" fill="rgb(${Math.round(triangle.r)} ${Math.round(triangle.g)} ${Math.round(triangle.b)})" fill-opacity="${format(triangle.a)}"/>`;
+      }).join("\n");
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${displayCanvas.width}" height="${displayCanvas.height}" viewBox="0 0 ${displayCanvas.width} ${displayCanvas.height}">\n  <rect width="100%" height="100%" fill="white"/>\n${polygons}\n</svg>`;
+      downloadBlob(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), `${state.sourceName}-triangles.svg`);
+    }
+
+    function downloadBlob(blob, filename) {
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function setInputsDisabled(disabled) {
+      [...Object.values(controls), ...Object.values(sliders)].forEach((input) => input.disabled = disabled);
+      scoreThreshold.disabled = disabled;
+      scoreThresholdValue.disabled = disabled;
+      scoreModeInputs.forEach((input) => input.disabled = disabled);
+      imageInput.disabled = disabled;
+    }
+
+    function setStatus(message) { statusText.textContent = message; }
+    function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
+    function format(value) { return Number(value.toFixed(3)); }
+    function nextFrame() { return new Promise((resolve) => requestAnimationFrame(resolve)); }
+    function structuredCloneTriangle(triangle) {
+      return { ...triangle, points: triangle.points.map((point) => ({ ...point })) };
+    }
+    function randomNormal() {
+      // Box-Muller transform, clipped to keep mutations intentionally local.
+      const u = Math.max(Number.EPSILON, Math.random());
+      const v = Math.max(Number.EPSILON, Math.random());
+      return clamp(Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v), -2.5, 2.5);
+    }
+
+  </script>
+</body>
+</html>
