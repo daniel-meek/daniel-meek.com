@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Evolutionary Image Approximation</title>
+  
+  <!-- ----------------------------------------------------------
+    Style Section
+  ----------------------------------------------------------- -->
+  
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #fff;
+      color: #111;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .menu { position: fixed; top: 18px; left: 18px; z-index: 10; }
+    .menu-button {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: #111;
+        cursor: pointer;
+        }
+
+        .menu-button:hover {
+        background: rgba(0, 0, 0, .06);
+        }
+
+        .menu-button:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+        }
+
+        .menu-button span {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        width: 24px;
+        height: 2px;
+        border-radius: 2px;
+        background: currentColor;
+        transition:
+            transform .5s cubic-bezier(.22, 1, .36, 1),
+            opacity .18s ease;
+        }
+
+        .menu-button span:nth-child(1) {
+        transform: translateY(-7px);
+        }
+
+        .menu-button span:nth-child(2) {
+        transform: translateY(-50%) scaleX(1);
+        }
+
+        .menu-button span:nth-child(3) {
+        transform: translateY(6px);
+        }
+
+        .menu-button[aria-expanded="true"] span:nth-child(1) {
+        transform: translateY(-50%) rotate(45deg);
+        }
+
+        .menu-button[aria-expanded="true"] span:nth-child(2) {
+        opacity: 0;
+        transform: translateY(-50%) scaleX(0);
+        }
+
+        .menu-button[aria-expanded="true"] span:nth-child(3) {
+        transform: translateY(-50%) rotate(-45deg);
+        }
+    .menu-links {
+      display: none;
+      min-width: 112px;
+      margin: 5px 0 0;
+      padding: 6px;
+      list-style: none;
+      border: 1px solid #ddd;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+    }
+    .menu.is-open .menu-links { display: block; }
+    .menu-links a {
+      display: block;
+      padding: 10px 12px;
+      color: #111;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .menu-links a:hover,
+    .menu-links a:focus-visible { background: #f3f3f3; outline: none; }
+
+    main {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 5vh 5vw;
+    }
+    canvas {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 75vw;
+      max-height: 75vh;
+      background: #fff;
+    }
+    .message {
+      position: fixed;
+      right: 16px;
+      bottom: 14px;
+      max-width: min(420px, calc(100vw - 32px));
+      color: #777;
+      font-size: 12px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ----------------------------------------------------------
+    HTML Section
+  ----------------------------------------------------------- -->
+
+  <nav class="menu" id="menu" aria-label="Site navigation">
+    <button class="menu-button" id="menuButton" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menuLinks">
+        <span></span>
+        <span></span>
+        <span></span>
+        </button>
+    <ul class="menu-links" id="menuLinks">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+    </ul>
+  </nav>
+
+  <main aria-label="Evolutionary image approximation showcase">
+    <canvas id="showcaseCanvas" width="1" height="1" aria-label="Animated evolutionary image approximation"></canvas>
+  </main>
+  <div class="message" id="message" role="status" aria-live="polite"></div>
+
+  <!-- ----------------------------------------------------------
+    JavaScript Section
+  ----------------------------------------------------------- -->
+
+  <script>
+    "use strict";
+
+    // All showcase choices and timing values live here so behavior is data-driven.
+    const SHOWCASE = {
+      imagePaths: [
+        "assets/evolutionary-image-approximation/001.jpg",
+        "assets/evolutionary-image-approximation/002.jpg",
+        "assets/evolutionary-image-approximation/003.jpg",
+        "assets/evolutionary-image-approximation/004.jpg",
+        "assets/evolutionary-image-approximation/005.jpg",
+        "assets/evolutionary-image-approximation/006.jpg",
+        "assets/evolutionary-image-approximation/007.jpg"
+      ],
+      shapeModes: ["triangle", "circle", "rectangle", "polygon"],
+      scoreModes: ["pixel", "ssim"],
+      randomRanges: {
+        candidates: [75, 100],
+        adjustments: [40, 50],
+        shapes: [1000, 2500],
+        polygonCorners: [3, 8]
+      },
+      minimumGain: 0.05,
+      adjustmentRange: 0.25,
+      evaluationMaxSide: 128,
+      timing: {
+        candidateShow: 25,
+        candidateFlashMs: 50,
+        candidateWinnerHoldMs: 500,
+        adjustmentShow: 10,
+        adjustmentFlashMs: 50,
+        adjustmentWinnerHoldMs: 500,
+        completedHoldMs: 1000,
+        failedImageRetryMs: 500
+      }
+    };
+
+    const canvas = document.querySelector("#showcaseCanvas");
+    const context = canvas.getContext("2d", { alpha: false });
+    const message = document.querySelector("#message");
+    const menu = document.querySelector("#menu");
+    const menuButton = document.querySelector("#menuButton");
+
+    const evaluationCanvas = document.createElement("canvas");
+    const evaluationContext = evaluationCanvas.getContext("2d", { alpha: false, willReadFrequently: true });
+    const targetCanvas = document.createElement("canvas");
+    const targetContext = targetCanvas.getContext("2d", { alpha: false, willReadFrequently: true });
+
+    const state = {
+      runId: 0,
+      width: 0,
+      height: 0,
+      targetPixels: null,
+      shapes: [],
+      settings: null,
+      failedImages: new Set()
+    };
+
+    menuButton.addEventListener("click", () => {
+      const open = menu.classList.toggle("is-open");
+      menuButton.setAttribute("aria-expanded", String(open));
+      menuButton.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    });
+    document.addEventListener("click", (event) => {
+      if (!menu.contains(event.target)) {
+        menu.classList.remove("is-open");
+        menuButton.setAttribute("aria-expanded", "false");
+        menuButton.setAttribute("aria-label", "Open menu");
+      }
+    });
+
+    function randomItem(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function randomInteger([minimum, maximum]) {
+      return minimum + Math.floor(Math.random() * (maximum - minimum + 1));
+    }
+
+    function createRunSettings() {
+      return {
+        imagePath: randomItem(SHOWCASE.imagePaths),
+        shapeMode: randomItem(SHOWCASE.shapeModes),
+        scoreMode: randomItem(SHOWCASE.scoreModes),
+        candidateCount: randomInteger(SHOWCASE.randomRanges.candidates),
+        adjustmentCount: randomInteger(SHOWCASE.randomRanges.adjustments),
+        shapeCount: randomInteger(SHOWCASE.randomRanges.shapes),
+        minimumGain: SHOWCASE.minimumGain,
+        adjustmentRange: SHOWCASE.adjustmentRange
+      };
+    }
+
+    async function startShowcase() {
+      paintCanvasWhite();
+
+      while (true) {
+        const runId = ++state.runId;
+        state.settings = createRunSettings();
+        state.shapes = [];
+
+        // Keep image-loading errors separate from processing errors. The previous
+        // broad catch incorrectly reported any runtime error as a missing image.
+        let image;
+        try {
+          image = await loadImage(state.settings.imagePath);
+        } catch (error) {
+          console.warn(error);
+          state.failedImages.add(state.settings.imagePath);
+          message.textContent = "Unable to load " + state.settings.imagePath + ". Update SHOWCASE.imagePaths to match your assets.";
+          await delay(SHOWCASE.timing.failedImageRetryMs);
+          continue;
+        }
+
+        if (runId !== state.runId) return;
+
+        try {
+          prepareImage(image);
+          message.textContent = "";
+          await runEvolution(runId);
+          await delay(SHOWCASE.timing.completedHoldMs);
+        } catch (error) {
+          console.error("Showcase processing failed:", error);
+          paintCanvasWhite();
+          message.textContent = error.name === "SecurityError"
+            ? "The image loaded, but browser security blocked pixel access. Serve the page and assets from the same HTTP origin instead of opening the HTML through file://."
+            : "The image loaded, but the approximation could not start. See the browser console for details.";
+          await delay(SHOWCASE.timing.failedImageRetryMs);
+        }
+      }
+    }
+
+    function loadImage(path) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("Could not load showcase image: " + path));
+        image.src = path;
+      });
+    }
+
+    function prepareImage(image) {
+      const scale = Math.min(1, SHOWCASE.evaluationMaxSide / Math.max(image.naturalWidth, image.naturalHeight));
+      state.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      state.height = Math.max(1, Math.round(image.naturalHeight * scale));
+
+      evaluationCanvas.width = targetCanvas.width = state.width;
+      evaluationCanvas.height = targetCanvas.height = state.height;
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+
+      // Resizing an alpha:false canvas resets its bitmap to black. Paint it white immediately, before pixel extraction or any evolutionary work can fail.
+      paintCanvasWhite();
+
+      targetContext.fillStyle = "#fff";
+      targetContext.fillRect(0, 0, state.width, state.height);
+      targetContext.drawImage(image, 0, 0, state.width, state.height);
+      state.targetPixels = targetContext.getImageData(0, 0, state.width, state.height).data;
+
+      evaluationContext.fillStyle = "#fff";
+      evaluationContext.fillRect(0, 0, state.width, state.height);
+      renderCommittedShapes();
+    }
+
+        function shouldShowAttempt(attemptIndex, showEvery) {
+    // 0, null, undefined, and negative values disable intermediate previews.
+    if (!Number.isFinite(showEvery) || showEvery <= 0) {
+        return false;
+    }
+
+    // attemptIndex is zero-based, so add 1 for human-friendly intervals.
+    return (attemptIndex + 1) % Math.floor(showEvery) === 0;
+    }
+
+    async function runEvolution(runId) {
+    const settings = state.settings;
+    const timing = SHOWCASE.timing;
+
+    for (
+        let shapeIndex = 0;
+        shapeIndex < settings.shapeCount;
+        shapeIndex += 1
+    ) {
+        if (runId !== state.runId) return;
+
+        const baseline = evaluationContext.getImageData(
+        0,
+        0,
+        state.width,
+        state.height
+        );
+
+        const baselineScore = scoreImage(
+        baseline.data,
+        settings.scoreMode
+        );
+
+        let winner = null;
+        let winnerScore = Infinity;
+
+        // Candidate stage
+        // Every candidate is created and scored. Only every candidateShow-th attempt is rendered visually.
+        for (
+        let attempt = 0;
+        attempt < settings.candidateCount;
+        attempt += 1
+        ) {
+        if (runId !== state.runId) return;
+
+        const candidate = createRandomShape(
+            settings.shapeMode,
+            baseline.data
+        );
+
+        const score = scoreCandidate(
+            baseline,
+            candidate,
+            settings.scoreMode
+        );
+
+        // Update the winner regardless of whether this candidate is shown.
+        if (score < winnerScore) {
+            winner = candidate;
+            winnerScore = score;
+        }
+
+        if (shouldShowAttempt(attempt, timing.candidateShow)) {
+            renderTrial(candidate);
+            await delay(timing.candidateFlashMs);
+
+            // Check again because the run may have been cancelled during delay.
+            if (runId !== state.runId) return;
+        }
+        }
+
+        // Protect against candidateCount being zero.
+        if (!winner) {
+        continue;
+        }
+
+        // Always display the actual best candidate.
+        renderTrial(winner);
+        await delay(timing.candidateWinnerHoldMs);
+
+        if (runId !== state.runId) return;
+
+        // Adjustment stage
+        // Every adjustment is created and scored. Only every adjustmentShow-th attempt is rendered visually.
+
+        for (
+        let attempt = 0;
+        attempt < settings.adjustmentCount;
+        attempt += 1
+        ) {
+        if (runId !== state.runId) return;
+
+        const adjusted = mutateShape(
+            winner,
+            attempt,
+            settings.adjustmentCount
+        );
+
+        const score = scoreCandidate(
+            baseline,
+            adjusted,
+            settings.scoreMode
+        );
+
+        // An adjustment can win even if it was not rendered.
+        if (score < winnerScore) {
+            winner = adjusted;
+            winnerScore = score;
+        }
+
+        if (shouldShowAttempt(attempt, timing.adjustmentShow)) {
+            renderTrial(adjusted);
+            await delay(timing.adjustmentFlashMs);
+
+            if (runId !== state.runId) return;
+        }
+        }
+
+        // Always display the final adjusted winner.
+        renderTrial(winner);
+        await delay(timing.adjustmentWinnerHoldMs);
+
+        if (runId !== state.runId) return;
+
+        const gain = baselineScore - winnerScore;
+
+        // Restore the committed image before applying the winning shape.
+        evaluationContext.putImageData(baseline, 0, 0);
+
+        if (gain >= settings.minimumGain) {
+        drawShape(evaluationContext, winner, 1, 1);
+        state.shapes.push(winner);
+        }
+
+        renderCommittedShapes();
+    }
+    }
+
+    function renderCommittedShapes() {
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      const scaleX = canvas.width / state.width;
+      const scaleY = canvas.height / state.height;
+      state.shapes.forEach((shape) => drawShape(context, shape, scaleX, scaleY));
+    }
+
+    function renderTrial(shape) {
+      renderCommittedShapes();
+      if (shape) drawShape(context, shape, canvas.width / state.width, canvas.height / state.height);
+    }
+
+    function createRandomShape(mode, currentPixels) {
+      const anchor = chooseErrorWeightedPoint(currentPixels);
+      const appearance = baseAppearance(anchor);
+      const maximum = Math.max(state.width, state.height);
+
+      if (mode === "circle") {
+        return { type: mode, x: anchor.x, y: anchor.y, radius: maximum * (0.02 + Math.random() * 0.25), ...appearance };
+      }
+      if (mode === "rectangle") {
+        const halfWidth = state.width * (0.02 + Math.random() * 0.22);
+        const halfHeight = state.height * (0.02 + Math.random() * 0.22);
+        return {
+          type: mode,
+          x1: clamp(anchor.x - halfWidth, 0, state.width),
+          y1: clamp(anchor.y - halfHeight, 0, state.height),
+          x2: clamp(anchor.x + halfWidth, 0, state.width),
+          y2: clamp(anchor.y + halfHeight, 0, state.height),
+          ...appearance
+        };
+      }
+
+      const pointCount = mode === "triangle" ? 3 : randomInteger(SHOWCASE.randomRanges.polygonCorners);
+      const radius = maximum * (0.04 + Math.random() * 0.30);
+      return { type: mode, points: randomRadialPoints(anchor, radius, pointCount), ...appearance };
+    }
+
+    function baseAppearance(anchor) {
+      const colour = sampleTargetColour(anchor.x, anchor.y);
+      const jitter = () => Math.round((Math.random() - 0.5) * 34);
+      return {
+        r: clamp(colour[0] + jitter(), 0, 255),
+        g: clamp(colour[1] + jitter(), 0, 255),
+        b: clamp(colour[2] + jitter(), 0, 255),
+        a: 0.12 + Math.random() * 0.58
+      };
+    }
+
+    function mutateShape(shape, adjustmentIndex, adjustmentTotal) {
+      const next = cloneShape(shape);
+      const cooling = Math.max(0.08, 1 - adjustmentIndex / Math.max(1, adjustmentTotal));
+      const step = Math.max(state.width, state.height) * 0.2 * state.settings.adjustmentRange * cooling;
+
+      if (next.type === "circle") {
+        next.x = clamp(next.x + randomNormal() * step * 0.45, 0, state.width);
+        next.y = clamp(next.y + randomNormal() * step * 0.45, 0, state.height);
+        next.radius = clamp(next.radius + randomNormal() * step, 0.5, Math.max(state.width, state.height));
+      } else if (next.type === "rectangle") {
+        const corner = Math.floor(Math.random() * 4);
+        if (corner === 0 || corner === 2) next.x1 = clamp(next.x1 + randomNormal() * step, 0, next.x2 - 0.5);
+        else next.x2 = clamp(next.x2 + randomNormal() * step, next.x1 + 0.5, state.width);
+        if (corner === 0 || corner === 1) next.y1 = clamp(next.y1 + randomNormal() * step, 0, next.y2 - 0.5);
+        else next.y2 = clamp(next.y2 + randomNormal() * step, next.y1 + 0.5, state.height);
+      } else {
+        const point = next.points[Math.floor(Math.random() * next.points.length)];
+        point.x = clamp(point.x + randomNormal() * step, 0, state.width);
+        point.y = clamp(point.y + randomNormal() * step, 0, state.height);
+      }
+
+      const colourStep = 72 * state.settings.adjustmentRange * cooling;
+      next.r = clamp(next.r + randomNormal() * colourStep, 0, 255);
+      next.g = clamp(next.g + randomNormal() * colourStep, 0, 255);
+      next.b = clamp(next.b + randomNormal() * colourStep, 0, 255);
+      next.a = clamp(next.a + randomNormal() * 0.22 * state.settings.adjustmentRange * cooling, 0.03, 0.92);
+      return next;
+    }
+
+    function randomRadialPoints(anchor, radius, count) {
+      const rotation = Math.random() * Math.PI * 2;
+      return Array.from({ length: count }, (_, index) => {
+        const angle = rotation + index * Math.PI * 2 / count + (Math.random() - 0.5) * (Math.PI / count) * 0.65;
+        const localRadius = radius * (0.55 + Math.random() * 0.75);
+        return {
+          x: clamp(anchor.x + Math.cos(angle) * localRadius, 0, state.width),
+          y: clamp(anchor.y + Math.sin(angle) * localRadius, 0, state.height)
+        };
+      });
+    }
+
+    function chooseErrorWeightedPoint(currentPixels) {
+      let best = { x: Math.random() * state.width, y: Math.random() * state.height, error: -1 };
+      for (let sample = 0; sample < 14; sample += 1) {
+        const x = Math.floor(Math.random() * state.width);
+        const y = Math.floor(Math.random() * state.height);
+        const index = (y * state.width + x) * 4;
+        const red = state.targetPixels[index] - currentPixels[index];
+        const green = state.targetPixels[index + 1] - currentPixels[index + 1];
+        const blue = state.targetPixels[index + 2] - currentPixels[index + 2];
+        const error = red * red + green * green + blue * blue;
+        if (error > best.error) best = { x, y, error };
+      }
+      return best;
+    }
+
+    function sampleTargetColour(x, y) {
+      const pixelX = clamp(Math.round(x), 0, state.width - 1);
+      const pixelY = clamp(Math.round(y), 0, state.height - 1);
+      const index = (pixelY * state.width + pixelX) * 4;
+      return [state.targetPixels[index], state.targetPixels[index + 1], state.targetPixels[index + 2]];
+    }
+
+    function scoreCandidate(baseline, shape, mode) {
+      evaluationContext.putImageData(baseline, 0, 0);
+      drawShape(evaluationContext, shape, 1, 1);
+      return scoreImage(evaluationContext.getImageData(0, 0, state.width, state.height).data, mode);
+    }
+
+    function scoreImage(pixels, mode) {
+      return mode === "ssim" ? scoreSsimLoss(pixels) : scorePixelLoss(pixels);
+    }
+
+    function scorePixelLoss(pixels) {
+      let error = 0;
+      for (let index = 0; index < pixels.length; index += 4) {
+        const red = state.targetPixels[index] - pixels[index];
+        const green = state.targetPixels[index + 1] - pixels[index + 1];
+        const blue = state.targetPixels[index + 2] - pixels[index + 2];
+        error += red * red + green * green + blue * blue;
+      }
+      return error / (state.width * state.height * 3);
+    }
+
+    function scoreSsimLoss(pixels) {
+      const windowSize = 8;
+      const c1 = (0.01 * 255) ** 2;
+      const c2 = (0.03 * 255) ** 2;
+      let total = 0;
+      let windows = 0;
+
+      for (let top = 0; top < state.height; top += windowSize) {
+        for (let left = 0; left < state.width; left += windowSize) {
+          const right = Math.min(left + windowSize, state.width);
+          const bottom = Math.min(top + windowSize, state.height);
+          const count = (right - left) * (bottom - top);
+          let targetMean = 0;
+          let generatedMean = 0;
+
+          for (let y = top; y < bottom; y += 1) {
+            for (let x = left; x < right; x += 1) {
+              const index = (y * state.width + x) * 4;
+              targetMean += luminance(state.targetPixels, index);
+              generatedMean += luminance(pixels, index);
+            }
+          }
+          targetMean /= count;
+          generatedMean /= count;
+
+          let targetVariance = 0;
+          let generatedVariance = 0;
+          let covariance = 0;
+          for (let y = top; y < bottom; y += 1) {
+            for (let x = left; x < right; x += 1) {
+              const index = (y * state.width + x) * 4;
+              const targetDelta = luminance(state.targetPixels, index) - targetMean;
+              const generatedDelta = luminance(pixels, index) - generatedMean;
+              targetVariance += targetDelta * targetDelta;
+              generatedVariance += generatedDelta * generatedDelta;
+              covariance += targetDelta * generatedDelta;
+            }
+          }
+
+          const divisor = Math.max(1, count - 1);
+          targetVariance /= divisor;
+          generatedVariance /= divisor;
+          covariance /= divisor;
+          const numerator = (2 * targetMean * generatedMean + c1) * (2 * covariance + c2);
+          const denominator = (targetMean ** 2 + generatedMean ** 2 + c1) * (targetVariance + generatedVariance + c2);
+          total += denominator === 0 ? 1 : numerator / denominator;
+          windows += 1;
+        }
+      }
+      return (1 - total / Math.max(1, windows)) * 100;
+    }
+
+    function drawShape(target, shape, scaleX, scaleY) {
+      target.beginPath();
+      if (shape.type === "circle") {
+        target.arc(shape.x * scaleX, shape.y * scaleY, shape.radius * (scaleX + scaleY) / 2, 0, Math.PI * 2);
+      } else if (shape.type === "rectangle") {
+        target.rect(shape.x1 * scaleX, shape.y1 * scaleY, (shape.x2 - shape.x1) * scaleX, (shape.y2 - shape.y1) * scaleY);
+      } else {
+        target.moveTo(shape.points[0].x * scaleX, shape.points[0].y * scaleY);
+        for (let index = 1; index < shape.points.length; index += 1) {
+          target.lineTo(shape.points[index].x * scaleX, shape.points[index].y * scaleY);
+        }
+        target.closePath();
+      }
+      target.fillStyle = `rgba(${Math.round(shape.r)}, ${Math.round(shape.g)}, ${Math.round(shape.b)}, ${shape.a})`;
+      target.fill();
+    }
+
+    function luminance(pixels, index) {
+      return 0.2126 * pixels[index] + 0.7152 * pixels[index + 1] + 0.0722 * pixels[index + 2];
+    }
+
+    function cloneShape(shape) {
+      return { ...shape, points: shape.points?.map((point) => ({ ...point })) };
+    }
+
+    function randomNormal() {
+      const first = Math.max(Number.EPSILON, Math.random());
+      const second = Math.max(Number.EPSILON, Math.random());
+      return clamp(Math.sqrt(-2 * Math.log(first)) * Math.cos(2 * Math.PI * second), -2.5, 2.5);
+    }
+
+    function clamp(value, minimum, maximum) {
+      return Math.min(maximum, Math.max(minimum, value));
+    }
+
+    function delay(milliseconds) {
+      return new Promise((resolve) => setTimeout(resolve, milliseconds));
+    }
+
+    function paintCanvasWhite() {
+      context.save();
+      context.setTransform(1, 0, 0, 1, 0, 0);
+      context.globalAlpha = 1;
+      context.globalCompositeOperation = "source-over";
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.restore();
+    }
+
+    startShowcase();
+  </script>
+</body>
+</html>
