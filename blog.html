@@ -1,45 +1,132 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%231f3a5f'/%3E%3Ctext x='32' y='45' font-size='38' text-anchor='middle' font-family='Georgia,serif' fill='%23fcfbf8'%3ED%3C/text%3E%3C/svg%3E">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..600,0..100&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog · Daniel Meek</title>
+  <meta name="theme-color" content="#FFD23F">
 
+  <script>
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.documentElement.classList.add("js");
+    }
+  </script>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='60' height='60' x='2' y='2' fill='%23FFD23F' stroke='%23000' stroke-width='4'/%3E%3Ctext x='32' y='46' font-size='40' font-weight='800' text-anchor='middle' font-family='sans-serif' fill='%23000'%3ED%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-    <header class="topbar">
-        <button class="menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="site-menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+<body>
 
-        <nav class="site-menu" id="site-menu" aria-label="Hovedmeny">
-            <a href="/">Hjem</a>
-            <a href="#blog">Blogg</a>
-            <a href="https://github.com/daniel-meek">GitHub</a>
-            <div class="menu-divider"></div>
-            <span class="menu-label">Språk</span>
-            <div class="menu-languages">
-                <a href="index.html" aria-current="page" lang="no">NO</a>
-                <a href="en/index.html" lang="en">EN</a>
-            </div>
-        </nav>
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <a href="/" class="site-name">daniel-meek.com/blog</a>
+    </div>
+
+    <div class="topbar-right">
+      <span class="status-pill"><span class="status-dot"></span> TRONDHEIM // NO</span>
+    </div>
+
+    <nav class="site-menu" id="site-menu" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="blog.html" aria-current="page">Blog</a>
+      <a href="projects.html">Projects</a>
+      <a href="https://github.com/daniel-meek">GitHub</a>
+      <div class="menu-divider"></div>
+      <span class="menu-label">Language</span>
+      <div class="menu-languages">
+        <a href="index.html" lang="no">NO</a>
+        <a href="en/index.html" aria-current="page" lang="en">EN</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <header class="intro">
+      <div class="intro-top">
+        <span class="badge badge-pink">SECTION // BLOG</span>
+        <span class="badge badge-mono">POSTS // 03</span>
+      </div>
+
+      <h1 data-no-split><span class="highlight">Blog.</span></h1>
+      <p class="lead">
+        A collection of my thoughts.
+      </p>
+      <p>
+        Write-ups on cybersecurity, networks, research, and side projects.
+      </p>
+
+      <div class="blog-hero-meta">
+        <a href="#y-2026" class="btn btn-primary">2026 ↓</a>
+        <!-- Add future years here as you publish -->
+        <!-- <a href="#y-2025" class="btn btn-secondary">2025 ↓</a> -->
+      </div>
     </header>
 
-    <body>
-        <main>
-            <p>
-                Nothing here but us chickens. 🐤
-            </p>
+    <section id="y-2026">
+      <div class="year-divider">
+        <h2 class="year-stamp">2026</h2>
+        <span class="year-rule" aria-hidden="true"></span>
+        <span class="year-count">03 POSTS</span>
+      </div>
 
-            <footer>
-                © 2026 daniel-meek
-            </footer>
-        </main>
+      <ul class="blog-list">
+        <li>
+          <a href="blog/20261003-evolutionary-image-approximation.html" class="blog-card-link">
+            <span class="when">2026.10.03 · Algorithmic Art &amp; Optimization</span>
+            <h3>Evolving Images with Geometric Primitives <span class="org">· Browser-Based Hill-Climbing</span></h3>
+            <p>Exploring genotype-to-phenotype mapping, error-weighted sampling, and perceptual SSIM loss in vanilla JavaScript, inspired by Berg et al. (2019).</p>
+            <div class="blog-tags">
+              <span class="tag">JavaScript</span>
+              <span class="tag">Canvas API</span>
+              <span class="tag">Optimization</span>
+            </div>
+          </a>
+        </li>
 
-    <script src="scripts.js"></script>
+        <li>
+          <a href="blog/20260928-portfolio-site.html" class="blog-card-link">
+            <span class="when">2026.09.28 · Web Development</span>
+            <h3>Portfolio Site <span class="org">· Exploring Portfolio Architectures</span></h3>
+            <p>Designing a minimal, zero-dependency personal site and unified CSS workspace for hosting interactive JS tools.</p>
+            <div class="blog-tags">
+              <span class="tag">HTML &amp; CSS</span>
+              <span class="tag">Neubrutalism</span>
+              <span class="tag">Architecture</span>
+            </div>
+          </a>
+        </li>
 
+        <li>
+          <a href="blog/20260926-artiis-2026.html" class="blog-card-link">
+            <span class="when">2026.09.26 · Publication &amp; Research</span>
+            <h3>ARTIIS 2026 <span class="org">· Feature-Reduced ML for IoT Anomaly Detection</span></h3>
+            <p>Summary of our research on on-device intrusion detection in resource-constrained IoT networks using the CIC IoT-DIAD 2024 dataset.</p>
+            <div class="blog-tags">
+              <span class="tag">Machine Learning</span>
+              <span class="tag">IoT Security</span>
+              <span class="tag">Research</span>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <footer>
+      <div class="footer-left">© 2026 DANIEL MEEK</div>
+      <div class="footer-left">
+        <span class="badge badge-mono">BLOG // ARCHIVE</span>
+      </div>
+    </footer>
+  </main>
+
+  <script src="scripts.js"></script>
 </body>
+</html>

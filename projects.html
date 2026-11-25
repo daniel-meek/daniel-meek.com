@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects · Daniel Meek</title>
+  <meta name="theme-color" content="#FFD23F">
+
+  <script>
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.documentElement.classList.add("js");
+    }
+  </script>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='60' height='60' x='2' y='2' fill='%23FFD23F' stroke='%23000' stroke-width='4'/%3E%3Ctext x='32' y='46' font-size='40' font-weight='800' text-anchor='middle' font-family='sans-serif' fill='%23000'%3ED%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <a href="/" class="site-name">daniel-meek.com/projects</a>
+    </div>
+
+    <div class="topbar-right">
+      <span class="status-pill"><span class="status-dot"></span> TRONDHEIM // NO</span>
+    </div>
+
+    <nav class="site-menu" id="site-menu" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="blog.html">Blog</a>
+      <a href="projects.html" aria-current="page">Projects</a>
+      <a href="https://github.com/daniel-meek">GitHub</a>
+      <div class="menu-divider"></div>
+      <span class="menu-label">Language</span>
+      <div class="menu-languages">
+        <a href="index.html" lang="no">NO</a>
+        <a href="en/index.html" aria-current="page" lang="en">EN</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="projects-page">
+    <header class="intro">
+      <div class="intro-top">
+        <span class="badge badge-green">SECTION // PROJECTS</span>
+        <span class="badge badge-mono">ITEMS // 02</span>
+      </div>
+
+      <h1 data-no-split><span class="highlight">Projects.</span></h1>
+      <p class="lead">
+        What I've been up to.
+      </p>
+    </header>
+
+    <section id="projects-grid">
+      <div class="projects-grid">
+
+        <a href="projects/evolutionary-image-approximation.html" class="project-block">
+          <img
+            class="project-preview"
+            src="assets/projects/evolutionary-image-approximation.png"
+            alt=""
+            loading="lazy"
+            onerror="this.remove()"
+          >
+          <div class="project-top">
+            <span class="when">Interactive Tool</span>
+            <span class="project-arrow" aria-hidden="true">↗</span>
+          </div>
+          <h3>Evolutionary Image Approximation</h3>
+          <p>Generative image reconstruction using overlapping geometric shapes and hill-climbing in vanilla JS.</p>
+          <div class="project-meta">
+            <span class="tag">Media</span>
+            <span class="tag">Canvas API</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/daniel-meek/UC3BCS20-Bachelor-Project" class="project-block project-block-secondary">
+          <img
+            class="project-preview"
+            src="assets/projects/rfe-iot-pipeline.png"
+            alt=""
+            loading="lazy"
+            onerror="this.remove()"
+          >
+          <div class="project-top">
+            <span class="when">ML Pipeline</span>
+            <span class="project-arrow" aria-hidden="true">↗</span>
+          </div>
+          <h3>RFE Pipeline for IoT Anomaly Detection</h3>
+          <p>Feature-reduced machine learning models evaluated for on-device intrusion detection in IoT networks.</p>
+          <div class="project-meta">
+            <span class="tag">Machine Learning</span>
+            <span class="tag">IoT</span>
+            <span class="tag">Security</span>
+          </div>
+        </a>
+
+        <!-- Template tile (no image = normal hover only, no placeholder)
+        <a href="#" class="project-block project-block-secondary">
+          <div class="project-top">
+            <span class="when">Category</span>
+            <span class="project-arrow" aria-hidden="true">↗</span>
+          </div>
+          <h3>Project Title</h3>
+          <p>Short description of the project.</p>
+          <div class="project-meta">
+            <span class="tag">Tag 1</span>
+            <span class="tag">Tag 2</span>
+          </div>
+        </a>
+        -->
+
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-left">© 2026 DANIEL MEEK</div>
+      <div class="footer-left">
+        <span class="badge badge-mono">PROJECTS // INDEX</span>
+      </div>
+    </footer>
+  </main>
+
+  <script src="scripts.js"></script>
+</body>
+</html>

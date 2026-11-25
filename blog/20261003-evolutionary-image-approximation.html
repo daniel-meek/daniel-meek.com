@@ -1,45 +1,168 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%231f3a5f'/%3E%3Ctext x='32' y='45' font-size='38' text-anchor='middle' font-family='Georgia,serif' fill='%23fcfbf8'%3ED%3C/text%3E%3C/svg%3E">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..600,0..100&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evolving Images with Geometric Primitives · Daniel Meek</title>
+  <meta name="theme-color" content="#FFD23F">
 
+  <script>
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.documentElement.classList.add("js");
+    }
+  </script>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='60' height='60' x='2' y='2' fill='%23FFD23F' stroke='%23000' stroke-width='4'/%3E%3Ctext x='32' y='46' font-size='40' font-weight='800' text-anchor='middle' font-family='sans-serif' fill='%23000'%3ED%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
 </head>
-    <header class="topbar">
-        <button class="menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="site-menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+<body>
 
-        <nav class="site-menu" id="site-menu" aria-label="Hovedmeny">
-            <a href="/">Hjem</a>
-            <a href="#blog">Blogg</a>
-            <a href="https://github.com/daniel-meek">GitHub</a>
-            <div class="menu-divider"></div>
-            <span class="menu-label">Språk</span>
-            <div class="menu-languages">
-            <a href="/" aria-current="page" lang="no">NO</a>
-            <a href="/en/" lang="en">EN</a>
-            </div>
-        </nav>
-    </header>
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
+        <span></span><span></span><span></span>
+      </button>
+      <a href="../" class="site-name">daniel-meek.com/blog</a>
+    </div>
 
-    <body>
-        <main>
-            <p>
-                Nothing here but us chickens. 🐤
-            </p>
+    <div class="topbar-right">
+      <span class="status-pill"><span class="status-dot"></span> TRONDHEIM // NO</span>
+    </div>
 
-            <footer>
-                © 2026 daniel-meek
-            </footer>
-        </main>
+    <nav class="site-menu" id="site-menu" aria-label="Main menu">
+      <a href="../">Home</a>
+      <a href="../blog.html" aria-current="page">Blog</a>
+      <a href="../projects.html">Projects</a>
+      <a href="https://github.com/daniel-meek">GitHub</a>
+    </nav>
+  </header>
 
-    <script src="scripts.js"></script>
+  <main>
+    <article>
+      <header class="intro">
+        <span class="when">2026.10.03 · Evolutionary Computing &amp; Canvas API</span>
+        <h1 data-no-split>Evolving Images with Transparent Geometric Shapes</h1>
+        <p class="lead">
+          Translating indirect genetic encodings from academic evolutionary art into a real-time, browser-based stochastic hill-climber.
+        </p>
+      </header>
 
+      <div class="post-body">
+        <p>
+          Can an algorithm paint a recognizable portrait using nothing but semi-transparent circles, rectangles, or polygons? In their 2019 paper from the OsloMet AI Lab, <em>"Evolved Art with Transparent, Overlapping, and Geometric Shapes"</em> (arXiv:1904.06110), Joachim Berg, Stefano Nichele, and colleagues explored how evolutionary algorithms can approximate complex target images—like the <em>Mona Lisa</em> or Theodor Kittelsen's <em>Nøkken</em>—using indirect genetic representations.
+        </p>
+        <p>
+          Inspired by their methodology, I built an interactive JavaScript implementation (<a href="../projects/evolutionary-image-approximation.html">Evolutionary Image Approximation</a>) to experiment with how different geometric primitives, mutation schedules, and perceptual fitness metrics behave in real time inside an HTML5 Canvas.
+        </p>
+
+        <h2>1. Indirect Encoding: Genotype to Phenotype</h2>
+        <p>
+          Rather than evolving a 2D grid of individual pixels, evolutionary art relies on an <strong>indirect encoding</strong>. As Berg et al. describe, the compressed genetic identity—the <em>genotype</em>—is an ordered collection of shape objects (an "image genome"), where each gene encodes parameters for a single geometric primitive:
+        </p>
+        <ul>
+          <li>
+            <h3>Colour &amp; Alpha <span class="org">· RGBA channels</span></h3>
+            <p>RGB values (0–255) paired with an alpha transparency scalar (0.0–1.0) so overlapping shapes blend optically.</p>
+          </li>
+          <li>
+            <h3>Spatial Coordinates <span class="org">· Anchor &amp; Bounds</span></h3>
+            <p>Canvas coordinates (<em>x</em>, <em>y</em>) and primitive-specific geometry: radius for circles, corner bounds for rectangles, or <em>N</em> radial vertices for polygons.</p>
+          </li>
+        </ul>
+        <p style="margin-top: 1.25rem;">
+          To evaluate a candidate, the algorithm performs a <strong>genotype-to-phenotype mapping</strong>: rendering the sequence of genes onto a blank 2D canvas buffer and comparing the resulting visual phenotype against the target image.
+        </p>
+
+        <h2>2. Lessons from the OsloMet Experiments</h2>
+        <p>
+          Berg et al. benchmarked polygons, circles, and lines across 10,000 generations using a (1+1) baseline configuration. Several of their empirical findings directly informed the parameter ranges in my web tool:
+        </p>
+
+        <table class="article-table">
+          <thead>
+            <tr>
+              <th>Experiment Variable</th>
+              <th>Berg et al. (2019) Finding</th>
+              <th>JS Tool Adaptation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Polygon Vertices</strong></td>
+              <td>8 vertices achieved the highest relative fitness (90.57%), outperforming triangles (3) and high-vertex shapes (15–20).</td>
+              <td>Polygon mode dynamically samples between <code>[3, 8]</code> vertices per primitive.</td>
+            </tr>
+            <tr>
+              <td><strong>Shape Primitives</strong></td>
+              <td>Circles and polygons excelled (~90–92% fitness); lines alone lagged behind (65.50%–83.86%).</td>
+              <td>Focused on triangles, polygons, circles, and rectangles for dense area coverage.</td>
+            </tr>
+            <tr>
+              <td><strong>Mutation Intensity</strong></td>
+              <td>High mutation probabilities (&gt;50%) destabilized convergence; soft local tweaks paired with occasional larger jumps worked best.</td>
+              <td>Implemented a two-stage loop: broad candidate exploration followed by simulated cooling adjustments.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>3. Optimizing for Real-Time Browser Execution</h2>
+        <p>
+          In Python with OpenCV, evolving a fixed genome of 20–50 shapes over 10,000 generations is computationally manageable offline. In a single-threaded browser environment, however, we want the viewer to watch the painting emerge live at 60fps using 1,000 to 2,500 shapes. To make this responsive, my implementation introduces three key adjustments:
+        </p>
+
+        <blockquote>
+          <strong>Error-Weighted Spawning:</strong> Instead of spawning new shapes purely at random across the canvas, <code>chooseErrorWeightedPoint()</code> samples 14 random pixel coordinates, computes the squared RGB error against the target image at each point, and anchors the new shape where the current approximation is most inaccurate.
+        </blockquote>
+
+        <p>
+          Once a promising candidate shape is found, it enters an <strong>adjustment phase with simulated cooling</strong>. Over 40–50 mutation steps, vertex positions, radii, and RGBA channels are perturbed using Gaussian noise (Box-Muller transform) scaled by a cooling factor:
+        </p>
+        <p>
+          $$\text{cooling} = \max\left(0.08, 1 - \frac{\text{attempt}}{\text{totalAdjustments}}\right)$$
+        </p>
+        <p>
+          Early adjustments make bold geometric corrections (analogous to Berg et al.'s <em>medium mutation</em>), while final steps make fine sub-pixel and tint refinements (<em>soft mutation</em>).
+        </p>
+
+        <h2>4. Pixel Loss vs. Perceptual SSIM</h2>
+        <p>
+          One of the most interesting observations in Berg et al. (Section 2.4) is the gap between mathematical pixel error and human visual perception:
+        </p>
+        <blockquote>
+          "The fitness score does not necessarily determine the best rendered image for human eyes... Certain defined features of an image can be more important for recognition by humans." — Berg et al. (2019)
+        </blockquote>
+        <p>
+          Standard pixel-by-pixel difference treats every pixel independently, often smoothing over high-contrast structural edges like eyes or horizons. To test this directly in the browser, I implemented a toggleable fitness function in the tool:
+        </p>
+        <ol>
+          <li><strong>Pixel Loss (MSE):</strong> Fast channel-wise squared error across RGB values. Great for rapid colour blocking.</li>
+          <li><strong>SSIM Loss (Structural Similarity Index):</strong> Evaluates 8 × 8 pixel windows for luminance mean, variance, and covariance. While heavier to compute, SSIM prioritizes structural edges and local contrast.</li>
+        </ol>
+
+        <div class="cta-box">
+          <div>
+            <strong>Watch the live simulation</strong>
+            <p>See the browser-based stochastic hill-climber evolve images in real time using randomized primitives and MSE/SSIM scoring.</p>
+          </div>
+          <a href="../projects/evolutionary-image-approximation.html" class="btn btn-secondary">Launch Showcase →</a>
+        </div>
+
+        <h2>References</h2>
+        <p class="post-references">
+          Berg, J., Berggren, N. G. A., Borgeteien, S. A., Jahren, C. R. A., Sajid, A., &amp; Nichele, S. (2019). <em>Evolved Art with Transparent, Overlapping, and Geometric Shapes</em>. Oslo Metropolitan University, AI Lab. <a href="https://arxiv.org/abs/1904.06110">arXiv:1904.06110v3</a>.
+        </p>
+      </div>
+    </article>
+
+    <footer>
+      <div class="footer-left"><a href="../blog.html">← BACK TO BLOG</a></div>
+      <div class="footer-left">© 2026 DANIEL MEEK</div>
+    </footer>
+  </main>
+
+  <script src="../scripts.js"></script>
 </body>
+</html>

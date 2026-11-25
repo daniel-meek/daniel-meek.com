@@ -1,45 +1,325 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%231f3a5f'/%3E%3Ctext x='32' y='45' font-size='38' text-anchor='middle' font-family='Georgia,serif' fill='%23fcfbf8'%3ED%3C/text%3E%3C/svg%3E">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..600,0..100&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="../style.css">
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daniel Meek</title>
+  <meta name="theme-color" content="#FFD23F">
+  
+  <link rel="alternate" hreflang="no" href="https://daniel-meek.com/">
+  <link rel="alternate" hreflang="en" href="https://daniel-meek.com/en/">
+  
+  <script>
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.documentElement.classList.add("js");
+    }
+  </script>
+  
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='60' height='60' x='2' y='2' fill='%23FFD23F' stroke='%23000' stroke-width='4'/%3E%3Ctext x='32' y='46' font-size='40' font-weight='800' text-anchor='middle' font-family='sans-serif' fill='%23000'%3ED%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
 </head>
-    <header class="topbar">
-        <button class="menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="site-menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+<body>
 
-        <nav class="site-menu" id="site-menu" aria-label="Hovedmeny">
-            <a href="/">Hjem</a>
-            <a href="#blog">Blogg</a>
-            <a href="https://github.com/daniel-meek">GitHub</a>
-            <div class="menu-divider"></div>
-                <span class="menu-label">Språk</span>
-                <div class="menu-languages">
-                <a href="/index.html" aria-current="page" lang="no">NO</a>
-                <a href="/en/index.html" lang="en">EN</a>
-            </div>
-        </nav>
-    </header>
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <a href="../en/index.html" class="site-name">daniel-meek.com/en</a>
+  </div>
 
-    <body>
-        <main>
-            <p>
-                Nothing here but us chickens. 🐤
-            </p>
+  <div class="topbar-right">
+    <span class="status-pill"><span class="status-dot"></span> TRONDHEIM // NO</span>
+  </div>
 
-            <footer>
-                © 2026 daniel-meek
-            </footer>
-        </main>
+  <nav class="site-menu" id="site-menu" aria-label="Main menu">
+    <a href="../en/index.html" aria-current="page">Home</a>
+    <a href="../blog.html">Blog</a>
+    <a href="../projects.html">Projects</a>
+    <a href="https://github.com/daniel-meek">GitHub</a>
+    <div class="menu-divider"></div>
+    <span class="menu-label">Language</span>
+    <div class="menu-languages">
+      <a href="../index.html" lang="no">NO</a>
+      <a href="../en/index.html" aria-current="page" lang="en">EN</a>
+    </div>
+  </nav>
+</header>
 
-    <script src="/scripts.js"></script>
+<main>
+
+  <!-- ======================================
+       00 // Introduction
+       ====================================== -->
+  <header class="intro">
+    <div class="intro-top">
+      <span class="badge badge-green">STATUS // MSc DIGSEC @ NTNU</span>
+      <span class="badge badge-mono">SYS.VER // 2026.12</span>
+    </div>
+
+    <div class="intro-grid">
+      <div class="intro-copy">
+        <h1 data-no-split>Hello,<br> I am <span class="highlight">Daniel.</span></h1>
+        <p class="lead">
+          Masters student in digital infrastructure and cybersecurity at NTNU.
+        </p>
+        <p>
+          I have a background in both cybersecurity and physical security work, and I am particularly interested in networks, infrastructure, and security in practice.
+        </p>
+        <div class="hero-actions">
+          <a href="#projects" class="btn btn-primary">View Projects ↓</a>
+          <a href="#publications" class="btn btn-secondary">Publications</a>
+          <a href="#contact" class="btn btn-secondary">Get in Touch</a>
+        </div>
+      </div>
+
+      <div class="intro-portrait">
+        <div class="portrait-frame">
+          <img src="../assets/daniel.jpg" alt="Portrait of Daniel Larsen Meek" width="180" height="180">
+          <span class="portrait-caption">FIG 01 // D. MEEK</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================
+       01 // Experience
+       ====================================== -->
+  <section id="experience">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Work Experience</h2>
+    </div>
+    <ul>
+      <li>
+        <span class="when">Nov 2021 - Jul 2026</span>
+        <h3>Site Manager <span class="org">· Securitas AS</span></h3>
+        <p>Operational management of guard team, quality assurance of security deliveries, and incident coordination.</p>
+      </li>
+      <li>
+        <span class="when">Jul 2016 - Nov 2021</span>
+        <h3>Security Guard <span class="org">· Securitas AS</span></h3>
+        <p>Physical security, access control, technical monitoring, and first-line incident management.</p>
+      </li>
+      <li>
+        <span class="when">Jan 2015 - Dec 2015</span>
+        <h3>Guard Soldier <span class="org">· Artillery Battalion, Norwegian Armed Forces</span></h3>
+        <p>Military guard and security service with strict requirements for readiness and access control.</p>
+      </li>
+      <li>
+        <span class="when">Aug 2014 - Jul 2016</span>
+        <h3>Service Technician <span class="org">· Get AS, via Avantas</span></h3>
+        <p>Installation, troubleshooting, and maintenance of network and broadband infrastructure.</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ======================================
+       02 // Education
+       ====================================== -->
+  <section id="education">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Education</h2>
+    </div>
+    <ul>
+      <li>
+        <span class="when">Aug 2026 - Present</span>
+        <h3>MSc, Digital Infrastructure and Cyber Security <span class="org">· NTNU</span></h3>
+        <p>Master's program with specialization in reliable performance design, network architecture, and security.</p>
+      </li>
+      <li>
+        <span class="when">Aug 2023 - Jun 2026</span>
+        <h3>BSc, Cyber Security <span class="org">· Noroff University College</span></h3>
+        <p>Bachelor's degree in network security, digital forensics, and intrusion detection in IoT networks.</p>
+      </li>
+      <li>
+        <span class="when">Sep 2025</span>
+        <h3>Trade Certificate, Building Operations <span class="org">· Trøndelag County Municipality</span></h3>
+        <p>Operation, maintenance, and technical monitoring of buildings and technical facilities.</p>
+      </li>
+      <li>
+        <span class="when">Apr 2022</span>
+        <h3>Trade Certificate, Security <span class="org">· Trøndelag County Municipality</span></h3>
+        <p>Risk assessment, physical security, contingency planning, and operational security management.</p>
+      </li>
+      <!--
+      <li>
+        <span class="when">Aug 2011 - Jun 2014</span>
+        <h3> General Studies, Natural Sciences <span class="org">· Rissa VGS</span></h3>
+        <p>Upper secondary education with specialization in technology and research, mathematics, physics, and chemistry.</p>
+      </li>
+      -->
+    </ul>
+  </section>
+
+  <!-- ======================================
+       03 // Positions
+       ====================================== -->
+  <section id="positions" class="positions">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Positions</h2>
+    </div>
+    <ul class="positions-list">
+      <li>
+        <span class="when">Jul 2026 - Present</span>
+        <h3>Class Representative, MDIGSEC <span class="org">· NTNU</span></h3>
+        <p>Representative for students in the Master's program in Digital Infrastructure and Cyber Security.</p>
+      </li>
+      <li>
+        <span class="when">Nov 2024 - Jul 2026</span>
+        <h3>Union Representative <span class="org">· Securitas AS | Norwegian Union of General Workers</span></h3>
+        <p>Union representative for security guards in the department, responsible for negotiations and working environment.</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ======================================
+       04 // Projects
+       ====================================== -->
+  <section id="projects">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Projects</h2>
+    </div>
+    <div class="projects-grid">
+      <a href="../projects/evolutionary-image-approximation.html" class="project-block"></a>
+        <div class="project-top">
+          <span class="when">INTERACTIVE TOOL</span>
+          <span class="project-arrow" aria-hidden="true">↗</span>
+        </div>
+        <h3>Evolutionary Image Approximation</h3>
+        <p>Generative image recreation using shapes and colors.</p>
+        <div class="project-meta">
+          <span class="tag">Media</span>
+          <span class="tag">Canvas API</span>
+        </div>
+      </a>
+      
+      <a href="https://github.com/daniel-meek/UC3BCS20-Bachelor-Project" class="project-block"></a>
+        <div class="project-top">
+          <span class="when">Machine Learning Pipeline</span>
+          <span class="project-arrow" aria-hidden="true">↗</span>
+        </div>
+        <h3>Recursive Feature Elimination Pipeline for IoT Anomaly Detection Models</h3>
+        <p>Bachelor Project at Noroff University College</p>
+        <div class="project-meta">
+          <span class="tag">Machine Learning</span>
+          <span class="tag">Network Security</span>
+          <span class="tag">IoT</span>
+          <span class="tag">Anomaly Detection</span>
+        </div>
+      </a>
+
+    </div>
+    <div class="section-actions">
+      <a href="../projects.html" class="btn btn-primary">All my projects →</a>
+    </div>
+  </section>
+
+  <!-- ======================================
+       05 // Publications
+       ====================================== -->
+  <section id="publications" class="publications">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Publications</h2>
+    </div>
+    <ul class="publications-list">
+      <li>
+        <span class="when">2026 · ARTIIS 2026</span>
+        <h3>Feature-Reduced Machine Learning for On-Device Anomaly Detection in Resource-Constrained IoT Networks <span class="org">, (2026), D. Meek &amp; B. Haskins</span></h3>
+        <p>Paper · <a href="../blog/20260926-artiis-2026.html">Blog</a> · <i>Publication link will be added when available.</i></p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ======================================
+       06 // Blog
+       ====================================== -->
+  <section id="blog" class="blog">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Blog</h2>
+    </div>
+    <ul class="blog-list">
+      <li>
+        <a href="../blog/20261003-evolutionary-image-approximation.html" class="row-link">
+          <span class="when">2026.10.03 · Algorithmic Art &amp; Optimization</span>
+          <h3>Evolving Images with Geometric Primitives <span class="org">· Browser-Based Hill-Climbing</span></h3>
+        </a>
+        <p>Exploring genotype-to-phenotype mapping, error-weighted sampling, and perceptual SSIM loss in vanilla JavaScript, inspired by Berg et al. (2019).</p>
+      </li>
+      
+      <li>
+        <a href="../blog/20260928-portfolio-site.html" class="row-link"></a>
+          <span class="when">2026.09.28 · Web Development</span>
+          <h3>Portfolio Site <span class="org">· Exploring Portfolio Sites</span></h3>
+        </a>
+        <p>Designing a minimal, zero-dependency personal site and unified CSS workspace for hosting interactive JS tools.</p>
+      </li>
+      
+      <li>
+        <a href="../blog/20260926-artiis-2026.html" class="row-link"></a>
+          <span class="when">2026.09.26 · Publication &amp; Research</span>
+          <h3>ARTIIS 2026 <span class="org">· Feature-Reduced Machine Learning for On-Device Anomaly Detection in Resource-Constrained IoT Networks</span></h3>
+        </a>
+        <p>Summary of our research on on-device intrusion detection in resource-constrained IoT networks using the CIC IoT-DIAD 2024 dataset.</p>
+      </li>
+    
+    </ul>
+    <div class="section-actions">
+      <a href="../blog.html" class="btn btn-secondary">All blog posts →</a>
+    </div>
+  </section>
+
+  <!-- ======================================
+       07 // Contact
+       ====================================== -->
+  <section id="contact" class="contact">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Contact</h2>
+    </div>
+    <div class="contact-card">
+      <!-- <p class="contact-lead">Available for professional discussions about networks, security, and research projects.</p> -->
+      <div class="contact-actions">
+        <a href="mailto:daniel.larsen.meek@gmail.com" class="btn btn-primary">
+          <span class="btn-label">E-MAIL</span>
+          <span class="btn-sub">daniel.larsen.meek@gmail.com</span>
+        </a>
+        <a href="https://www.linkedin.com/in/daniel-meek-066472229/" rel="me" class="btn btn-secondary">
+          <span class="btn-label">LINKEDIN ↗</span>
+          <span class="btn-sub">/in/daniel-meek</span>
+        </a>
+        <a href="https://github.com/daniel-meek" rel="me" class="btn btn-secondary">
+          <span class="btn-label">GITHUB ↗</span>
+          <span class="btn-sub">@daniel-meek</span>
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- ======================================
+       Footer
+       ====================================== -->
+  <footer>
+    <div class="footer-left">© 2026 DANIEL MEEK</div>
+    <div class="footer-left">
+      <span class="badge badge-mono">border: 3px solid #000; box-shadow: 5px 5px 0 0 #000;
+      </span>
+    </div>
+  </footer>
+
+</main>
+
+<script src="../scripts.js"></script>
 
 </body>
+</html>

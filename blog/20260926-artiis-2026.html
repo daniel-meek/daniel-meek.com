@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARTIIS 2026 · Daniel Meek</title>
+  <meta name="theme-color" content="#FFD23F">
+
+  <script>
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.documentElement.classList.add("js");
+    }
+  </script>
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='60' height='60' x='2' y='2' fill='%23FFD23F' stroke='%23000' stroke-width='4'/%3E%3Ctext x='32' y='46' font-size='40' font-weight='800' text-anchor='middle' font-family='sans-serif' fill='%23000'%3ED%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
+        <span></span><span></span><span></span>
+      </button>
+      <a href="../" class="site-name">daniel-meek.com/blog</a>
+    </div>
+
+    <div class="topbar-right">
+      <span class="status-pill"><span class="status-dot"></span> TRONDHEIM // NO</span>
+    </div>
+
+    <nav class="site-menu" id="site-menu" aria-label="Main menu">
+      <a href="../">Home</a>
+      <a href="../blog.html" aria-current="page">Blog</a>
+      <a href="../projects.html">Projects</a>
+      <a href="https://github.com/daniel-meek">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <article>
+      <header class="intro">
+        <span class="when">2026.09.26 · Publication &amp; Research</span>
+        <h1 data-no-split>Feature-Reduced Machine Learning for On-Device Anomaly Detection in Resource-Constrained IoT Networks</h1>
+        <p class="lead">D. L. Meek &amp; B. Haskins (2026) · Presented at ARTIIS 2026.</p>
+      </header>
+
+      <div class="post-body">
+        <p>
+          Intrusion detection on resource-constrained IoT devices faces a tight trade-off: rich network flow datasets contain dozens of statistical features, but edge hardware rarely has the memory or CPU budget to extract and evaluate all of them in real time.
+        </p>
+        <p>
+          In this paper—co-authored with B. Haskins and presented at <strong>ARTIIS 2026</strong>—we investigate how Recursive Feature Elimination (RFE) can shrink machine learning models for on-device anomaly detection without sacrificing detection performance, evaluated on the <strong>CIC IoT-DIAD 2024</strong> dataset.
+        </p>
+
+        <h2>Key Focus Areas</h2>
+        <ul>
+          <li>
+            <h3>Feature Reduction via RFE</h3>
+            <p>Systematically pruning redundant network flow features to lower inference overhead and memory footprint.</p>
+          </li>
+          <li>
+            <h3>On-Device Feasibility</h3>
+            <p>Benchmarking reduced models against the constraints of real-world edge hardware rather than cloud-only accuracy metrics.</p>
+          </li>
+        </ul>
+
+        <div class="cta-box">
+          <div>
+            <strong>Source Code &amp; Pipeline</strong>
+            <p>Explore the RFE pipeline and experimental setup from the underlying bachelor's project on GitHub.</p>
+          </div>
+          <a href="https://github.com/daniel-meek/UC3BCS20-Bachelor-Project" class="btn btn-secondary">View Repo ↗</a>
+        </div>
+
+        <p><em>Full paper link and citation details will be added here once the ARTIIS 2026 conference proceedings are published.</em></p>
+      </div>
+    </article>
+
+    <footer>
+      <div class="footer-left"><a href="../blog.html">← BACK TO BLOG</a></div>
+      <div class="footer-left">© 2026 DANIEL MEEK</div>
+    </footer>
+  </main>
+
+  <script src="../scripts.js"></script>
+</body>
+</html>
